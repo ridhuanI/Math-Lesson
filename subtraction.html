@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tolak Dengan Pinjam</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>🧮 Tolak Dengan Pinjam (Interaktif)</h2>
+
+<!-- BARIS ATAS -->
+<div class="row">
+  <div class="box" id="puluhTop" draggable="true">3</div>
+  <div class="box" id="saTop">2</div>
+</div>
+
+<!-- BARIS BAWAH -->
+<div class="row-bawah">
+  <div class="minus">−</div>
+  <div class="box" id="puluhBottom">1</div>
+  <div class="box" id="saBottom">8</div>
+</div>
+
+<!-- GARIS PEMISAH -->
+<div class="garis"></div>
+
+<!-- JAWAPAN -->
+<div class="row" id="answerRow">
+  <div class="dropzone" id="ansPuluh">_</div>
+  <div class="dropzone" id="ansSa">_</div>
+</div>
+
+<!-- PAPAN NOMBOR -->
+<div id="numberPad" style="margin-top:30px;">
+  <p><strong>Seret nombor ke kotak jawapan:</strong></p>
+  <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; width:320px; margin:auto;">
+    <div class="num" draggable="true">0</div>
+    <div class="num" draggable="true">1</div>
+    <div class="num" draggable="true">2</div>
+    <div class="num" draggable="true">3</div>
+    <div class="num" draggable="true">4</div>
+    <div class="num" draggable="true">5</div>
+    <div class="num" draggable="true">6</div>
+    <div class="num" draggable="true">7</div>
+    <div class="num" draggable="true">8</div>
+    <div class="num" draggable="true">9</div>
+  </div>
+</div>
+
+<!-- BUTANG -->
+<button onclick="cekJawapan()">Cek Jawapan</button>
+<button onclick="soalanBaru()">🔁 Soalan Baru</button>
+<a href="index.html" style="display:block; margin-top:25px; font-size:18px; color:#555;">🏠 Kembali ke Menu Utama</a>
+
+<div id="feedback"></div>
+
+<script src="subs_script.js"></script>
+</body>
+</html>

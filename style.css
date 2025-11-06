@@ -1,0 +1,146 @@
+body {
+  font-family: Comic Sans MS;
+  text-align: center;
+  background: #fffaf0;
+  margin-top: 40px;
+}
+
+h2 {
+  color: #ff6600;
+  margin-bottom: 30px;
+}
+
+/* Baris nombor */
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Baris bawah khas - parent utk simbol tolak */
+.row-bawah {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  position: relative; /* penting supaya .minus ikut baris ni */
+}
+
+/* Kotak nombor */
+.box {
+  border: 2px solid #333;
+  border-radius: 8px;
+  width: 70px;
+  height: 70px;
+  line-height: 70px;
+  font-size: 40px;
+  background: #fff;
+  user-select: none;
+  transition: background 0.3s, color 0.3s;
+}
+
+.box.dragging { opacity: 0.5; background: #ffe599; }
+
+/* Simbol tolak sejajar bawah kotak kiri */
+.minus {
+  position: absolute;
+  left: 800px; /* offset ikut kotak kiri */
+  top: 1px;   /* tengah menegak */
+  font-size: 50px;
+  font-weight: bold;
+  width: 40px;
+  text-align: center;
+}
+
+/* Warna khas */
+.red { color: red; font-weight: bold; }
+.green { color: green; font-weight: bold; }
+
+/* Animasi pinjam */
+.arrow {
+  font-size: 30px;
+  color: #ff6600;
+  animation: move 1s ease-in-out;
+}
+
+.preview {
+  background: #e3ffe3;
+  color: green;
+  transition: 0.2s ease;
+}
+
+.floating10 {
+  position: fixed;
+  pointer-events: none;
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff6600;
+  opacity: 0.9;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes move {
+  0% { opacity: 0; transform: translateY(-10px); }
+  50% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+/* Jawapan */
+#answerRow {
+  margin-top: 0px;
+  padding-top: 1px;
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* sama dengan .row gap */
+}
+
+.num {
+  border: 2px solid #aaa;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 28px;
+  border-radius: 6px;
+  background: #fff;
+  cursor: grab;
+}
+
+.dropzone {
+  display: flex;                 /* guna flexbox untuk center align */
+  justify-content: center;       /* center secara mendatar */
+  align-items: center;           /* center secara menegak */
+  border: 2px dashed #333;
+  width: 70px;                   /* ubah ikut saiz yang kau nak */
+  height: 70px;
+  font-size: 40px;
+  background: #fafafa;
+  border-radius: 8px;
+  color: #999;
+}
+
+.garis {
+  width: 220px;           /* lebar garis – ikut dua kotak (70+70+15gap) */
+  height: 4px;            /* ketebalan */
+  background: #333;       /* warna */
+  margin: 0 auto 10px;    /* center & jarak bawah */
+  border-radius: 2px;     /* hujung lembut */
+}
+
+button {
+  font-size: 20px;
+  margin-top: 25px;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  background: #ffd966;
+  cursor: pointer;
+}
+
+#feedback {
+  margin-top: 20px;
+  font-size: 28px;
+  font-weight: bold;
+}
