@@ -104,25 +104,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   //  🖱️ DRAG MOVE
   // =====================
-  // --- GERAKKAN FLOATING (offset supaya tak terlindung jari) ---
-   window.addEventListener("dragover", e => {
-     if (!floatingText) return;
+  window.addEventListener("dragover", e => {
+    if (!floatingText) return;
 
-     // offset ke kanan 40px dan ke atas 30px
-     const offsetX = 40;
-     const offsetY = -30;
+    // offset ke kanan 40px dan ke atas 30px
+    const offsetX = 40;
+    const offsetY = -30;
 
-     floatingText.style.left = e.pageX + offsetX + "px";
-     floatingText.style.top = e.pageY + offsetY + "px";
-    });
-
+    floatingText.style.left = e.pageX + offsetX + "px";
+    floatingText.style.top = e.pageY + offsetY + "px";
+  });
 
   // =====================
   //  🟩 HOVER & DROP LOGIC
   // =====================
   saBox.addEventListener("dragover", e => e.preventDefault());
 
-  // Hover kanan
   saBox.addEventListener("dragenter", e => {
     e.preventDefault();
     if (!sudahPinjam) {
@@ -133,7 +130,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Keluar hover
   saBox.addEventListener("dragleave", e => {
     e.preventDefault();
     if (!sudahPinjam) {
@@ -143,7 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Drop confirm
   saBox.addEventListener("drop", e => {
     e.preventDefault();
     if (sudahPinjam) return;
@@ -164,12 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // =====================
-  //  🖱️ DRAG END
-  // =====================
   puluhBox.addEventListener("dragend", e => {
     if (!sudahPinjam) {
-      // reset balik
       puluhBox.textContent = puluhTop;
       puluhBox.classList.remove("red");
       saBox.textContent = saTop;
@@ -230,4 +221,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.cekJawapan = cekJawapan;
   window.soalanBaru = soalanBaru;
+
+  // =====================
+  //  📱 SOKONGAN SENTUHAN UNTUK TELEFON
+  // =====================
+  const draggables = document.querySelectorAll(".num");
+  let activeNum = null;
+
+  draggables.forEach(num => {
+    // Bila mula sentuh
+    num.addEventListener("touchstart", e => {
+      activeNum = num;
+      num.classList.add("dragging");
+    });
+
+    // Bila jari sedang gerak
+    num.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropzone = elem?.closest(".dropzone");
+      document.querySelectorAll(".dropzone").forEach(z => z.style.borderColor = "#333");
+      if (dropzone) dropzone.style.borderColor = "#4CAF50";
+    });
+
+    // Bila jari lepas (drop)
+    num.addEventListener("touchend", e => {
+      const touch = e.changedTouches[0];
+      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropzone = elem?.closest(".dropzone");
+      if (dropzone) {
+        dropzone.textContent = num.textContent;
+        dropzone.style.color = "#000";
+        dropzone.style.borderColor = "#4CAF50";
+      }
+      num.classList.remove("dragging");
+      activeNum = null;
+    });
+  });
 });
