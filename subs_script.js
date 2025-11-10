@@ -182,6 +182,89 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('[draggable="true"]').forEach(el => el.removeAttribute('draggable'));
   }
 
+  // --- Touch untuk PINJAM (puluhTop -> saTop) ---
+  let pinjamTouchStart = null;
+
+  puluhBox.addEventListener("touchstart", e => {
+    if (sudahPinjam || saTop >= saBottom) return;
+    pinjamTouchStart = e.touches[0];
+    puluhBox.classList.add("red");
+
+    floatingText = document.createElement("div");
+    floatingText.className = "floating10";
+    floatingText.textContent = "10+";
+    document.body.appendChild(floatingText);
+  });
+
+  puluhBox.addEventListener("touchmove", e => {
+    if (!pinjamTouchStart || !floatingText) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    floatingText.style.left = touch.pageX + 40 + "px";
+    floatingText.style.top = touch.pageY - 30 + "px";
+
+    // Safari-safe fallback
+    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!elem) {
+      const dx = [0, -1, 1, -2, 2];
+      for (const x of dx) {
+        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
+        if (elem) break;
+      }
+    }
+
+    const saTarget = elem && (elem.id === "saTop" || elem.closest("#saTop"));
+    if (saTarget && !sudahPinjam) {
+      saBox.classList.add("preview");
+      saBox.textContent = saTop + 10;
+      floatingText.textContent = `10+${saTop}`;
+    } else {
+      saBox.classList.remove("preview");
+      saBox.textContent = saTop;
+      floatingText.textContent = "10+";
+    }
+  });
+
+  puluhBox.addEventListener("touchend", e => {
+    if (!pinjamTouchStart) return;
+
+    const touch = e.changedTouches[0];
+    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (!elem) {
+      const dx = [0, -1, 1, -2, 2];
+      for (const x of dx) {
+        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
+        if (elem) break;
+      }
+    }
+
+    const saTarget = elem && (elem.id === "saTop" || elem.closest("#saTop"));
+    if (saTarget && !sudahPinjam) {
+      puluhTop -= 1;
+      saTop += 10;
+      sudahPinjam = true;
+
+      puluhBox.textContent = puluhTop;
+      saBox.textContent = saTop;
+      puluhBox.classList.add("red");
+      saBox.classList.add("green");
+      saBox.classList.remove("preview");
+    } else {
+      puluhBox.textContent = puluhTop;
+      puluhBox.classList.remove("red");
+      saBox.textContent = saTop;
+      saBox.classList.remove("preview");
+    }
+
+    if (floatingText) {
+      floatingText.remove();
+      floatingText = null;
+    }
+    pinjamTouchStart = null;
+  });
+
+  // --- Touch untuk DRAG JAWAPAN ---
   const draggables = document.querySelectorAll(".num");
   draggables.forEach(num => {
     num.addEventListener("touchstart", () => num.classList.add("dragging"));
