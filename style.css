@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+
 body {
-  font-family: "Comic Sans MS", "Comic Neue", cursive;
+  font-family: 'Comic Neue', 'Arial Rounded MT Bold', 'Poppins', sans-serif;
   text-align: center;
   background: #fffaf0;
   margin-top: 40px;
@@ -81,11 +83,18 @@ h2 {
 .floating10 {
   position: fixed;
   pointer-events: none;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
   color: #ff6600;
-  opacity: 0.9;
-  transform: translate(-50%, -50%);
+  opacity: 0.95;
+  transform: translate(-50%, -50%) scale(1.15);
+  transition: transform 0.05s linear, opacity 0.1s ease;
+  z-index: 9999;
+}
+
+.dropzone.previewing {
+  background: #e6ffe6;
+  border-color: #4CAF50;
 }
 
 .garis {

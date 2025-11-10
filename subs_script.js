@@ -200,8 +200,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!pinjamTouchStart || !floatingText) return;
     e.preventDefault();
     const touch = e.touches[0];
-    floatingText.style.left = touch.pageX + 40 + "px";
-    floatingText.style.top = touch.pageY - 30 + "px";
+    floatingText.style.left = touch.pageX + 60 + "px";
+    floatingText.style.top = touch.pageY - 80 + "px";
+    floatingText.style.zIndex = "9999";
 
     // Safari-safe fallback
     let elem = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -273,8 +274,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const touch = e.touches[0];
       const elem = document.elementFromPoint(touch.clientX, touch.clientY);
       const dropzone = elem?.closest(".dropzone");
-      document.querySelectorAll(".dropzone").forEach(z => z.style.borderColor = "#333");
-      if (dropzone) dropzone.style.borderColor = "#4CAF50";
+
+      document.querySelectorAll(".dropzone").forEach(z => {
+        z.style.borderColor = "#333";
+        z.style.opacity = "1";
+        z.classList.remove("previewing");
+        if (!z.textContent.trim()) z.textContent = "_";
+      });
+
+      if (dropzone) {
+        dropzone.style.borderColor = "#4CAF50";
+        dropzone.textContent = num.textContent;
+        dropzone.style.opacity = "0.6";
+        dropzone.classList.add("previewing");
+      }
     });
     num.addEventListener("touchend", e => {
       const touch = e.changedTouches[0];
@@ -285,7 +298,11 @@ document.addEventListener("DOMContentLoaded", () => {
         dropzone.style.color = "#000";
         dropzone.style.borderColor = "#4CAF50";
       }
-      document.querySelectorAll(".dropzone").forEach(z => z.style.borderColor = "#333");
+      document.querySelectorAll(".dropzone").forEach(z => {
+        z.style.borderColor = "#333";
+        z.style.opacity = "1";
+        z.classList.remove("previewing");
+      });
       num.classList.remove("dragging");
     });
   });
