@@ -1,5 +1,5 @@
 body {
-  font-family: Comic Sans MS;
+  font-family: "Comic Sans MS", "Comic Neue", cursive;
   text-align: center;
   background: #fffaf0;
   margin-top: 40px;
@@ -10,7 +10,7 @@ h2 {
   margin-bottom: 30px;
 }
 
-/* Baris nombor */
+/* Layout utama */
 .row {
   display: flex;
   justify-content: center;
@@ -19,15 +19,6 @@ h2 {
   margin-bottom: 10px;
 }
 
-/* Baris bawah khas - parent utk simbol tolak */
-.row-bawah {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  position: relative; /* penting supaya .minus ikut baris ni */
-}
 
 /* Kotak nombor */
 .box {
@@ -39,32 +30,47 @@ h2 {
   font-size: 40px;
   background: #fff;
   user-select: none;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s, color 0.3s, transform 0.2s;
+  touch-action: none;
 }
 
 .box.dragging { opacity: 0.5; background: #ffe599; }
 
-/* Simbol tolak sejajar bawah kotak kiri */
+.row-bawah {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* kumpulan khas untuk puluh + tanda tolak */
+.puluh-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* tanda tolak duduk atas kotak puluh, bukan tengah baris */
 .minus {
   position: absolute;
-  left: 800px; /* offset ikut kotak kiri */
-  top: 1px;   /* tengah menegak */
+  left: calc(50% - 100px); /* kira separuh total dua kotak (70+70+10gap)/2 = ~75px, adjust + margin */
+  top: 50%;
+  transform: translate(-100%, -50%);
   font-size: 50px;
   font-weight: bold;
-  width: 40px;
-  text-align: center;
+  color: #000;
+  user-select: none;
+  pointer-events: none;
 }
+
+
 
 /* Warna khas */
 .red { color: red; font-weight: bold; }
 .green { color: green; font-weight: bold; }
-
-/* Animasi pinjam */
-.arrow {
-  font-size: 30px;
-  color: #ff6600;
-  animation: move 1s ease-in-out;
-}
 
 .preview {
   background: #e3ffe3;
@@ -82,21 +88,15 @@ h2 {
   transform: translate(-50%, -50%);
 }
 
-@keyframes move {
-  0% { opacity: 0; transform: translateY(-10px); }
-  50% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(10px); }
+.garis {
+  width: 220px;
+  height: 4px;
+  background: #333;
+  margin: 0 auto 10px;
+  border-radius: 2px;
 }
 
-/* Jawapan */
-#answerRow {
-  margin-top: 0px;
-  padding-top: 1px;
-  display: flex;
-  justify-content: center;
-  gap: 15px; /* sama dengan .row gap */
-}
-
+/* Dropzone & nombor */
 .num {
   border: 2px solid #aaa;
   width: 50px;
@@ -106,14 +106,17 @@ h2 {
   border-radius: 6px;
   background: #fff;
   cursor: grab;
+  touch-action: none;
+  transition: transform 0.2s;
 }
+.dragging { opacity: 0.7; transform: scale(1.1); }
 
 .dropzone {
-  display: flex;                 /* guna flexbox untuk center align */
-  justify-content: center;       /* center secara mendatar */
-  align-items: center;           /* center secara menegak */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: 2px dashed #333;
-  width: 70px;                   /* ubah ikut saiz yang kau nak */
+  width: 70px;
   height: 70px;
   font-size: 40px;
   background: #fafafa;
@@ -121,12 +124,13 @@ h2 {
   color: #999;
 }
 
-.garis {
-  width: 220px;           /* lebar garis – ikut dua kotak (70+70+15gap) */
-  height: 4px;            /* ketebalan */
-  background: #333;       /* warna */
-  margin: 0 auto 10px;    /* center & jarak bawah */
-  border-radius: 2px;     /* hujung lembut */
+.num-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 320px;
+  margin: auto;
 }
 
 button {
@@ -139,8 +143,36 @@ button {
   cursor: pointer;
 }
 
+.back-link {
+  display: block;
+  margin-top: 25px;
+  font-size: 18px;
+  color: #555;
+  text-decoration: none;
+}
+
 #feedback {
   margin-top: 20px;
   font-size: 28px;
   font-weight: bold;
+}
+
+/* Responsif */
+@media (max-width: 480px) {
+  .minus {
+    font-size: 42px;
+    line-height: 55px;
+  }
+}
+
+
+  .num {
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+  }
+
+  .garis {
+    width: 170px;
+  }
 }

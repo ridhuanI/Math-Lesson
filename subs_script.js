@@ -17,23 +17,22 @@ document.addEventListener("DOMContentLoaded", () => {
     feedback.textContent = "";
     feedback.style.color = "black";
 
-    puluhTop = Math.floor(Math.random() * 8) + 2; // 2–9
-    saTop = Math.floor(Math.random() * 9) + 1;
-    puluhBottom = Math.floor(Math.random() * 8) + 1;
-    saBottom = Math.floor(Math.random() * 9) + 1;
-
     const perluPinjam = Math.random() < 0.5;
 
     if (perluPinjam) {
-      if (saTop >= saBottom) [saTop, saBottom] = [saBottom, saTop];
-      const numTop = puluhTop * 10 + saTop;
-      const numBottom = puluhBottom * 10 + saBottom;
-      if (numTop < numBottom) puluhTop = puluhBottom + 1;
+      do {
+        puluhTop = Math.floor(Math.random() * 8) + 2;
+        puluhBottom = Math.floor(Math.random() * puluhTop);
+        saBottom = Math.floor(Math.random() * 9) + 1;
+        saTop = Math.floor(Math.random() * saBottom);
+      } while (saTop >= saBottom);
     } else {
-      if (saTop < saBottom) [saTop, saBottom] = [saBottom, saTop];
-      const numTop = puluhTop * 10 + saTop;
-      const numBottom = puluhBottom * 10 + saBottom;
-      if (numTop < numBottom) puluhTop = puluhBottom + 1;
+      do {
+        puluhTop = Math.floor(Math.random() * 8) + 2;
+        puluhBottom = Math.floor(Math.random() * puluhTop);
+        saTop = Math.floor(Math.random() * 9) + 1;
+        saBottom = Math.floor(Math.random() * saTop);
+      } while (saTop < saBottom);
     }
 
     puluhBox.textContent = puluhTop;
@@ -41,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
     puluhBottomBox.textContent = puluhBottom;
     saBottomBox.textContent = saBottom;
 
-    puluhBox.classList.remove("red");
-    saBox.classList.remove("green", "preview");
+    puluhBox.classList.remove("red", "green");
+    saBox.classList.remove("red", "green", "preview");
 
     document.querySelectorAll(".dropzone").forEach(z => {
       z.textContent = "_";
@@ -54,82 +53,45 @@ document.addEventListener("DOMContentLoaded", () => {
   soalanBaru();
 
   // =====================
-  //  🖱️ DRAG START
+  //  🖱️ DRAG START (DESKTOP)
   // =====================
   puluhBox.addEventListener("dragstart", e => {
-    // kalau dah pernah pinjam, stop terus
-    if (sudahPinjam) {
+    if (sudahPinjam || saTop >= saBottom) {
       e.preventDefault();
       return;
     }
 
-    // jika tak perlu pinjam (contoh: saTop >= saBottom), cegah terus sebelum ubah apa-apa
-    if (saTop >= saBottom) {
-      e.preventDefault();
-
-      // 🔧 buang floating text kalau sempat dibuat
-      if (floatingText) {
-        floatingText.remove();
-        floatingText = null;
-      }
-
-      // Optional: tunjuk cue visual ringkas
-      puluhBox.style.background = "#ffd6d6";
-      setTimeout(() => (puluhBox.style.background = "#fff"), 250);
-
-      // pastikan nombor & warna tak berubah
-      puluhBox.textContent = puluhTop;
-      puluhBox.classList.remove("red");
-      return;
-    }
-
-    // ✅ Perlu pinjam – proceed macam biasa
     floatingText = document.createElement("div");
     floatingText.className = "floating10";
     floatingText.textContent = "10+";
     document.body.appendChild(floatingText);
 
-    // Hilangkan ghost image default
     const img = new Image();
     img.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
     e.dataTransfer.setDragImage(img, 0, 0);
 
-    // Preview nilai kiri (puluh) berkurang dulu
     puluhBox.textContent = puluhTop - 1;
     puluhBox.classList.add("red");
-
     e.dataTransfer.setData("text/plain", "10+");
   });
 
-  // =====================
-  //  🖱️ DRAG MOVE
-  // =====================
   window.addEventListener("dragover", e => {
     if (!floatingText) return;
-
-    // offset ke kanan 40px dan ke atas 30px
     const offsetX = 40;
     const offsetY = -30;
-
     floatingText.style.left = e.pageX + offsetX + "px";
     floatingText.style.top = e.pageY + offsetY + "px";
   });
 
-  // =====================
-  //  🟩 HOVER & DROP LOGIC
-  // =====================
   saBox.addEventListener("dragover", e => e.preventDefault());
-
   saBox.addEventListener("dragenter", e => {
     e.preventDefault();
     if (!sudahPinjam) {
-      const saValue = parseInt(saBox.textContent);
       saBox.classList.add("preview");
-      saBox.textContent = saValue + 10;
-      if (floatingText) floatingText.textContent = `10+${saValue}`;
+      saBox.textContent = saTop + 10;
+      if (floatingText) floatingText.textContent = `10+${saTop}`;
     }
   });
-
   saBox.addEventListener("dragleave", e => {
     e.preventDefault();
     if (!sudahPinjam) {
@@ -138,34 +100,26 @@ document.addEventListener("DOMContentLoaded", () => {
       if (floatingText) floatingText.textContent = "10+";
     }
   });
-
   saBox.addEventListener("drop", e => {
     e.preventDefault();
     if (sudahPinjam) return;
-
     puluhTop -= 1;
     saTop += 10;
     sudahPinjam = true;
-
     puluhBox.textContent = puluhTop;
     saBox.textContent = saTop;
     puluhBox.classList.add("red");
     saBox.classList.add("green");
     saBox.classList.remove("preview");
-
-    if (floatingText) {
-      floatingText.remove();
-      floatingText = null;
-    }
+    if (floatingText) floatingText.remove();
+    floatingText = null;
   });
-
-  puluhBox.addEventListener("dragend", e => {
+  puluhBox.addEventListener("dragend", () => {
     if (!sudahPinjam) {
       puluhBox.textContent = puluhTop;
       puluhBox.classList.remove("red");
       saBox.textContent = saTop;
       saBox.classList.remove("preview");
-      if (floatingText) floatingText.textContent = "10+";
     }
     if (floatingText) {
       floatingText.remove();
@@ -174,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =====================
-  //  🔢 DRAG & DROP JAWAPAN
+  //  🔢 DRAG & DROP JAWAPAN (DESKTOP)
   // =====================
   const nums = document.querySelectorAll(".num");
   nums.forEach(num => {
@@ -182,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
       e.dataTransfer.setData("text/plain", num.textContent)
     );
   });
-
   const drops = document.querySelectorAll(".dropzone");
   drops.forEach(drop => {
     drop.addEventListener("dragover", e => e.preventDefault());
@@ -223,19 +176,15 @@ document.addEventListener("DOMContentLoaded", () => {
   window.soalanBaru = soalanBaru;
 
   // =====================
-  //  📱 SOKONGAN SENTUHAN UNTUK TELEFON
+  //  📱 SOKONGAN SENTUHAN UNTUK IPAD / ANDROID
   // =====================
+  if ('ontouchstart' in window) {
+    document.querySelectorAll('[draggable="true"]').forEach(el => el.removeAttribute('draggable'));
+  }
+
   const draggables = document.querySelectorAll(".num");
-  let activeNum = null;
-
   draggables.forEach(num => {
-    // Bila mula sentuh
-    num.addEventListener("touchstart", e => {
-      activeNum = num;
-      num.classList.add("dragging");
-    });
-
-    // Bila jari sedang gerak
+    num.addEventListener("touchstart", () => num.classList.add("dragging"));
     num.addEventListener("touchmove", e => {
       e.preventDefault();
       const touch = e.touches[0];
@@ -244,8 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".dropzone").forEach(z => z.style.borderColor = "#333");
       if (dropzone) dropzone.style.borderColor = "#4CAF50";
     });
-
-    // Bila jari lepas (drop)
     num.addEventListener("touchend", e => {
       const touch = e.changedTouches[0];
       const elem = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -255,8 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
         dropzone.style.color = "#000";
         dropzone.style.borderColor = "#4CAF50";
       }
+      document.querySelectorAll(".dropzone").forEach(z => z.style.borderColor = "#333");
       num.classList.remove("dragging");
-      activeNum = null;
     });
   });
 });

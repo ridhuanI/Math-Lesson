@@ -19,9 +19,10 @@
 <!-- BARIS BAWAH -->
 <div class="row-bawah">
   <div class="minus">−</div>
-  <div class="box" id="puluhBottom">1</div>
-  <div class="box" id="saBottom">8</div>
+  <div class="box" id="puluhBottom">5</div>
+  <div class="box" id="saBottom">2</div>
 </div>
+
 
 <!-- GARIS PEMISAH -->
 <div class="garis"></div>
@@ -35,7 +36,7 @@
 <!-- PAPAN NOMBOR -->
 <div id="numberPad" style="margin-top:30px;">
   <p><strong>Seret nombor ke kotak jawapan:</strong></p>
-  <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; width:320px; margin:auto;">
+  <div class="num-container">
     <div class="num" draggable="true">0</div>
     <div class="num" draggable="true">1</div>
     <div class="num" draggable="true">2</div>
@@ -52,7 +53,7 @@
 <!-- BUTANG -->
 <button onclick="cekJawapan()">Cek Jawapan</button>
 <button onclick="soalanBaru()">🔁 Soalan Baru</button>
-<a href="index.html" style="display:block; margin-top:25px; font-size:18px; color:#555;">🏠 Kembali ke Menu Utama</a>
+<a href="index.html" class="back-link">🏠 Kembali ke Menu Utama</a>
 
 <div id="feedback"></div>
 
