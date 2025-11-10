@@ -9,9 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const saBottomBox = document.getElementById("saBottom");
   const feedback = document.getElementById("feedback");
 
-  // =====================
-  //  🧮 JANA SOALAN BARU
-  // =====================
+  // ============================
+  // 🧮 JANA SOALAN BARU
+  // ============================
   function soalanBaru() {
     sudahPinjam = false;
     feedback.textContent = "";
@@ -52,9 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   soalanBaru();
 
-  // =====================
-  //  🖱️ DRAG START (DESKTOP)
-  // =====================
+  // ============================
+  // 🖱️ DRAG START (DESKTOP)
+  // ============================
   puluhBox.addEventListener("dragstart", e => {
     if (sudahPinjam || saTop >= saBottom) {
       e.preventDefault();
@@ -77,10 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("dragover", e => {
     if (!floatingText) return;
-    const offsetX = 40;
-    const offsetY = -30;
-    floatingText.style.left = e.pageX + offsetX + "px";
-    floatingText.style.top = e.pageY + offsetY + "px";
+    floatingText.style.left = e.pageX + 40 + "px";
+    floatingText.style.top = e.pageY - 30 + "px";
   });
 
   saBox.addEventListener("dragover", e => e.preventDefault());
@@ -92,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (floatingText) floatingText.textContent = `10+${saTop}`;
     }
   });
+
   saBox.addEventListener("dragleave", e => {
     e.preventDefault();
     if (!sudahPinjam) {
@@ -100,20 +99,24 @@ document.addEventListener("DOMContentLoaded", () => {
       if (floatingText) floatingText.textContent = "10+";
     }
   });
+
   saBox.addEventListener("drop", e => {
     e.preventDefault();
     if (sudahPinjam) return;
     puluhTop -= 1;
     saTop += 10;
     sudahPinjam = true;
+
     puluhBox.textContent = puluhTop;
     saBox.textContent = saTop;
     puluhBox.classList.add("red");
     saBox.classList.add("green");
     saBox.classList.remove("preview");
+
     if (floatingText) floatingText.remove();
     floatingText = null;
   });
+
   puluhBox.addEventListener("dragend", () => {
     if (!sudahPinjam) {
       puluhBox.textContent = puluhTop;
@@ -127,15 +130,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // =====================
-  //  🔢 DRAG & DROP JAWAPAN (DESKTOP)
-  // =====================
+  // ============================
+  // 🔢 DRAG & DROP JAWAPAN (DESKTOP)
+  // ============================
   const nums = document.querySelectorAll(".num");
   nums.forEach(num => {
-    num.addEventListener("dragstart", e =>
-      e.dataTransfer.setData("text/plain", num.textContent)
-    );
+    num.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", num.textContent);
+    });
   });
+
   const drops = document.querySelectorAll(".dropzone");
   drops.forEach(drop => {
     drop.addEventListener("dragover", e => e.preventDefault());
@@ -148,9 +152,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // =====================
-  //  ✅ SEMAK JAWAPAN
-  // =====================
+  // ============================
+  // ✅ SEMAK JAWAPAN
+  // ============================
   function cekJawapan() {
     const ansPuluh = document.getElementById("ansPuluh").textContent.trim();
     const ansSa = document.getElementById("ansSa").textContent.trim();
@@ -175,14 +179,14 @@ document.addEventListener("DOMContentLoaded", () => {
   window.cekJawapan = cekJawapan;
   window.soalanBaru = soalanBaru;
 
-  // =====================
-  //  📱 SOKONGAN SENTUHAN UNTUK IPAD / ANDROID
-  // =====================
+  // ============================
+  // 📱 SOKONGAN SENTUHAN (iPad/iPhone)
+  // ============================
   if ('ontouchstart' in window) {
     document.querySelectorAll('[draggable="true"]').forEach(el => el.removeAttribute('draggable'));
   }
 
-  // --- Touch untuk PINJAM (puluhTop -> saTop) ---
+  // --- Pinjam (puluhTop → saTop) ---
   let pinjamTouchStart = null;
 
   puluhBox.addEventListener("touchstart", e => {
@@ -199,12 +203,12 @@ document.addEventListener("DOMContentLoaded", () => {
   puluhBox.addEventListener("touchmove", e => {
     if (!pinjamTouchStart || !floatingText) return;
     e.preventDefault();
+
     const touch = e.touches[0];
     floatingText.style.left = touch.pageX + 60 + "px";
     floatingText.style.top = touch.pageY - 80 + "px";
     floatingText.style.zIndex = "9999";
 
-    // Safari-safe fallback
     let elem = document.elementFromPoint(touch.clientX, touch.clientY);
     if (!elem) {
       const dx = [0, -1, 1, -2, 2];
@@ -262,18 +266,42 @@ document.addEventListener("DOMContentLoaded", () => {
       floatingText.remove();
       floatingText = null;
     }
+
     pinjamTouchStart = null;
   });
 
-  // --- Touch untuk DRAG JAWAPAN ---
+  // --- Drag Jawapan (Touch + Floating Preview) ---
   const draggables = document.querySelectorAll(".num");
+  let activeFloat = null;
+
   draggables.forEach(num => {
-    num.addEventListener("touchstart", () => num.classList.add("dragging"));
+    num.addEventListener("touchstart", e => {
+      e.preventDefault();
+      num.classList.add("dragging");
+
+      if (activeFloat) activeFloat.remove();
+      activeFloat = document.createElement("div");
+      activeFloat.className = "floating10";
+      activeFloat.textContent = num.textContent;
+      document.body.appendChild(activeFloat);
+
+      const touch = e.touches[0];
+      activeFloat.style.left = touch.pageX + 60 + "px";
+      activeFloat.style.top = touch.pageY - 80 + "px";
+      activeFloat.style.zIndex = "9999";
+    });
+
     num.addEventListener("touchmove", e => {
       e.preventDefault();
+
       const touch = e.touches[0];
       const elem = document.elementFromPoint(touch.clientX, touch.clientY);
       const dropzone = elem?.closest(".dropzone");
+
+      if (activeFloat) {
+        activeFloat.style.left = touch.pageX + 60 + "px";
+        activeFloat.style.top = touch.pageY - 80 + "px";
+      }
 
       document.querySelectorAll(".dropzone").forEach(z => {
         z.style.borderColor = "#333";
@@ -284,25 +312,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (dropzone) {
         dropzone.style.borderColor = "#4CAF50";
+        dropzone.style.background = "#e6ffe6";
         dropzone.textContent = num.textContent;
         dropzone.style.opacity = "0.6";
         dropzone.classList.add("previewing");
       }
     });
+
     num.addEventListener("touchend", e => {
       const touch = e.changedTouches[0];
       const elem = document.elementFromPoint(touch.clientX, touch.clientY);
       const dropzone = elem?.closest(".dropzone");
+
       if (dropzone) {
         dropzone.textContent = num.textContent;
         dropzone.style.color = "#000";
         dropzone.style.borderColor = "#4CAF50";
+        dropzone.style.background = "#fff";
       }
+
+      if (activeFloat) {
+        activeFloat.style.transition = "opacity 0.3s ease";
+        activeFloat.style.opacity = "0";
+        setTimeout(() => {
+          activeFloat.remove();
+          activeFloat = null;
+        }, 300);
+      }
+
       document.querySelectorAll(".dropzone").forEach(z => {
         z.style.borderColor = "#333";
         z.style.opacity = "1";
         z.classList.remove("previewing");
+        z.style.background = "#fafafa";
       });
+
       num.classList.remove("dragging");
     });
   });
