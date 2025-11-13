@@ -68,6 +68,17 @@ h2 {
   pointer-events: none;
 }
 
+.plus {
+  position: absolute;
+  left: calc(50% - 100px);
+  top: 50%;
+  transform: translate(-100%, -50%);
+  font-size: 50px;
+  font-weight: bold;
+  color: #000;
+  user-select: none;
+  pointer-events: none;
+}
 
 
 /* Warna khas */
