@@ -18,8 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
       totalSoalan = Number(url.get("q")) || 5;
 
       // hide normal buttons
-      document.getElementById("btnCek").style.display = "none";
-      document.getElementById("btnBaru").style.display = "none";
+      const bCek = document.getElementById("btnCek");
+      const bBaru = document.getElementById("btnBaru");
+      if (bCek) bCek.style.display = "none";
+      if (bBaru) bBaru.style.display = "none";
   }
 
   const puluhBox = document.getElementById("puluhTop");
@@ -45,11 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // HUD UPDATE
-      hud.style.display = "block";   // 🔥 WAJIB — TAMBAH INI
-      hud.textContent = `Soalan ${currentSoalan} / ${totalSoalan}`;
+      // HUD UPDATE + show
+      if (hud) {
+        hud.style.display = "block";
+        hud.textContent = `Soalan ${currentSoalan} / ${totalSoalan}`;
+      }
     } else {
-      hud.textContent = ""; // normal mode
+      if (hud) hud.style.display = "none";
     }
 
     const perluPinjam = Math.random() < 0.5;
@@ -91,11 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // QUIZ END → redirect result
   // ============================
   function tamatQuiz() {
-    document.getElementById("btnCek").style.display = "inline-block";
-    document.getElementById("btnBaru").style.display = "inline-block";
+    const bCek = document.getElementById("btnCek");
+    const bBaru = document.getElementById("btnBaru");
+    if (bCek) bCek.style.display = "inline-block";
+    if (bBaru) bBaru.style.display = "inline-block";
 
     quizMode = false;
-    hud.textContent = "";
+    if (hud) hud.style.display = "none";
 
     let betul = score;
     let salah = totalSoalan - score;
@@ -178,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ============================
-  // DROP ANSWER (DESKTOP)
+  // DROP ANSWER (DESKTOP) - unchanged
   // ============================
   const nums = document.querySelectorAll(".num");
   nums.forEach(num => {
@@ -197,19 +203,220 @@ document.addEventListener("DOMContentLoaded", () => {
       drop.style.color = "#000";
       drop.style.borderColor = "#4CAF50";
 
-      // 🔥 QUIZ MODE FIX: auto-next only when BOTH boxes filled
+      // QUIZ MODE: auto-next only when both boxes filled
       if (quizMode) {
         const p = document.getElementById("ansPuluh").textContent.trim();
         const s = document.getElementById("ansSa").textContent.trim();
-
         const ready = /^[0-9]$/.test(p) && /^[0-9]$/.test(s);
+        if (ready) setTimeout(() => cekJawapan(), 120);
+      }
+    });
+  });
 
+  // ============================
+  // TOUCH SUPPORT: X-Function (centralized)
+  // ============================
+  // xTouchPlace handles touch interactions for number buttons (.num)
+  function xTouchPlace(numText, touch) {
+    // create floating element
+    const floatEl = document.createElement("div");
+    floatEl.className = "floating10";
+    floatEl.textContent = numText;
+    floatEl.style.position = "absolute";
+    floatEl.style.left = (touch.pageX + 40) + "px";
+    floatEl.style.top = (touch.pageY - 80) + "px";
+    floatEl.style.zIndex = "9999";
+    document.body.appendChild(floatEl);
+
+    // helper to update float pos
+    function moveTo(t) {
+      floatEl.style.left = (t.pageX + 40) + "px";
+      floatEl.style.top = (t.pageY - 80) + "px";
+    }
+
+    // previewing: highlight dropzone under touch
+    function previewAt(t) {
+      let elem = document.elementFromPoint(t.clientX, t.clientY);
+      if (!elem) return null;
+      const dz = elem.closest ? elem.closest(".dropzone") : null;
+      // clear others preview
+      document.querySelectorAll(".dropzone").forEach(z => {
+        if (!z.textContent.trim()) z.textContent = "_";
+        z.style.borderColor = "#333";
+        z.style.background = "#fafafa";
+      });
+      if (dz) {
+        dz.style.borderColor = "#4CAF50";
+        dz.style.background = "#e6ffe6";
+        dz.textContent = numText; // show preview
+        dz.style.opacity = "0.6";
+        return dz;
+      }
+      return null;
+    }
+
+    // touchmove handler
+    function onMove(e) {
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      moveTo(t);
+      previewAt(t);
+      e.preventDefault();
+    }
+
+    // touchend finalizer
+    function onEnd(e) {
+      // find final element
+      const t = e.changedTouches[0];
+      let elem = document.elementFromPoint(t.clientX, t.clientY);
+      const dz = elem && elem.closest ? elem.closest(".dropzone") : null;
+
+      if (dz) {
+        // place number into dropzone
+        dz.textContent = numText;
+        dz.style.color = "#000";
+        dz.style.borderColor = "#4CAF50";
+        dz.style.background = "#fff";
+      } else {
+        // no dropzone — do nothing (floating fades)
+      }
+
+      // fade out floatEl then remove
+      floatEl.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+      floatEl.style.opacity = "0";
+      floatEl.style.transform = "scale(0.8)";
+      setTimeout(() => {
+        if (floatEl && floatEl.parentNode) floatEl.parentNode.removeChild(floatEl);
+      }, 250);
+
+      // cleanup previews on dropzones
+      document.querySelectorAll(".dropzone").forEach(z => {
+        z.style.borderColor = "#333";
+        z.style.opacity = "1";
+        z.classList.remove("previewing");
+        z.style.background = "#fafafa";
+      });
+
+      // After placing, if quizMode then check both boxes
+      if (quizMode) {
+        const p = document.getElementById("ansPuluh").textContent.trim();
+        const s = document.getElementById("ansSa").textContent.trim();
+        const ready = /^[0-9]$/.test(p) && /^[0-9]$/.test(s);
         if (ready) {
+          // small delay to allow UX
           setTimeout(() => cekJawapan(), 120);
         }
       }
 
-    });
+      // remove listeners
+      window.removeEventListener("touchmove", onMove, { passive: false });
+      window.removeEventListener("touchend", onEnd, { passive: false });
+    }
+
+    // attach listeners
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onEnd, { passive: false });
+  }
+
+  // Attach touchstart to all number buttons using xTouchPlace
+  // (this replaces any older touch handlers for .num)
+  document.querySelectorAll(".num").forEach(n => {
+    n.addEventListener("touchstart", function(e) {
+      e.preventDefault();
+      const t = e.touches[0];
+      const numText = this.textContent.trim();
+      xTouchPlace(numText, t);
+    }, { passive: false });
+  });
+
+  // ========= pinjam touch for puluhBox (borrow) =========
+  // keep original borrowing touch logic but ensure compatibility with xTouchPlace above
+  if ('ontouchstart' in window) {
+    // remove draggable attr so desktop drag doesn't interfere on touch devices
+    document.querySelectorAll('[draggable="true"]').forEach(el => el.removeAttribute('draggable'));
+  }
+
+  let pinjamTouchStart = null;
+
+  puluhBox.addEventListener("touchstart", e => {
+    if (sudahPinjam || saTop >= saBottom) return;
+    pinjamTouchStart = e.touches[0];
+    puluhBox.classList.add("red");
+
+    floatingText = document.createElement("div");
+    floatingText.className = "floating10";
+    floatingText.textContent = "10+";
+    document.body.appendChild(floatingText);
+  });
+
+  puluhBox.addEventListener("touchmove", e => {
+    if (!pinjamTouchStart || !floatingText) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    floatingText.style.left = touch.pageX + 60 + "px";
+    floatingText.style.top = touch.pageY - 80 + "px";
+    floatingText.style.zIndex = "9999";
+
+    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!elem) {
+      const dx = [0, -1, 1, -2, 2];
+      for (const x of dx) {
+        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
+        if (elem) break;
+      }
+    }
+
+    const saTarget = elem && (elem.id === "saTop" || elem.closest && elem.closest("#saTop"));
+    if (saTarget && !sudahPinjam) {
+      saBox.classList.add("preview");
+      saBox.textContent = saTop + 10;
+      floatingText.textContent = `10+${saTop}`;
+    } else {
+      saBox.classList.remove("preview");
+      saBox.textContent = saTop;
+      floatingText.textContent = "10+";
+    }
+  }, { passive: false });
+
+  puluhBox.addEventListener("touchend", e => {
+    if (!pinjamTouchStart) return;
+
+    const touch = e.changedTouches[0];
+    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (!elem) {
+      const dx = [0, -1, 1, -2, 2];
+      for (const x of dx) {
+        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
+        if (elem) break;
+      }
+    }
+
+    const saTarget = elem && (elem.id === "saTop" || elem.closest && elem.closest("#saTop"));
+    if (saTarget && !sudahPinjam) {
+      puluhTop -= 1;
+      saTop += 10;
+      sudahPinjam = true;
+
+      puluhBox.textContent = puluhTop;
+      saBox.textContent = saTop;
+      puluhBox.classList.add("red");
+      saBox.classList.add("green");
+      saBox.classList.remove("preview");
+    } else {
+      puluhBox.textContent = puluhTop;
+      puluhBox.classList.remove("red");
+      saBox.textContent = saTop;
+      saBox.classList.remove("preview");
+    }
+
+    if (floatingText) {
+      floatingText.remove();
+      floatingText = null;
+    }
+
+    pinjamTouchStart = null;
   });
 
   // ============================
