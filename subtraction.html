@@ -8,7 +8,7 @@
     <title>Operasi Tolak</title>
 
     <style>
-        /* Fix for mobile devices: allow smooth touch drag */
+        /* Allow free touch movement */
         * {
             touch-action: none;
         }
@@ -19,12 +19,12 @@
 
 <h2 class="page-title">🧮 Operasi Tolak</h2>
 
-<!-- HUD QUIZ (Standardized as Addition) -->
+<!-- HUD -->
 <div id="hud" style="display:none; font-size:20px; margin-bottom:10px; font-weight:600;"></div>
 
 <!-- BARIS ATAS -->
 <div class="row">
-  <div class="box" id="puluhTop">3</div>
+  <div class="box" id="puluhTop" draggable="true">3</div>
   <div class="box" id="saTop">2</div>
 </div>
 
@@ -44,23 +44,23 @@
   <div class="dropzone" id="ansSa">_</div>
 </div>
 
-<!-- NUMBER PAD WRAPPER -->
+<!-- NUMBER PAD -->
 <div id="numberPadWrapper" style="margin-top:30px;">
 
     <div id="numberPad">
         <p><strong>Seret nombor ke kotak jawapan:</strong></p>
 
         <div class="num-container">
-            <div class="num">0</div>
-            <div class="num">1</div>
-            <div class="num">2</div>
-            <div class="num">3</div>
-            <div class="num">4</div>
-            <div class="num">5</div>
-            <div class="num">6</div>
-            <div class="num">7</div>
-            <div class="num">8</div>
-            <div class="num">9</div>
+            <div class="num" draggable="true">0</div>
+            <div class="num" draggable="true">1</div>
+            <div class="num" draggable="true">2</div>
+            <div class="num" draggable="true">3</div>
+            <div class="num" draggable="true">4</div>
+            <div class="num" draggable="true">5</div>
+            <div class="num" draggable="true">6</div>
+            <div class="num" draggable="true">7</div>
+            <div class="num" draggable="true">8</div>
+            <div class="num" draggable="true">9</div>
         </div>
     </div>
 
@@ -68,7 +68,7 @@
 
 </div>
 
-<!-- NORMAL MODE BUTTONS -->
+<!-- NORMAL BUTTONS -->
 <button id="btnCek" onclick="cekJawapan()">Cek Jawapan</button>
 <button id="btnBaru" onclick="soalanBaru()">🔁 Soalan Baru</button>
 
