@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Keputusan Quiz</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            padding-top: 60px;
+            text-align: center;
+            background: #fffaf0;
+        }
+
+        h1 {
+            color: #ff6600;
+            margin-bottom: 30px;
+        }
+
+        .result-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 22px;
+            color: #333;
+            min-width: 260px;
+        }
+
+        .result-card p {
+            margin: 10px 0;
+        }
+
+        .label-bintang {
+            font-size: 20px;
+            margin-top: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .stars {
+            font-size: 45px;
+            margin-top: 5px;
+        }
+
+        .star-active {
+            color: #ffcc00;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+        }
+
+        .star-inactive {
+            color: #ddd;
+        }
+
+        .feedback-text {
+            margin-top: 15px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #ff6600;
+        }
+
+        /* Back link – simple, not button */
+        a.back-link {
+            font-size: 20px;
+            color: #444;
+            text-decoration: none;
+            padding: 8px 0;
+            display: inline-block;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        a.back-link:hover {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Keputusan Quiz</h1>
+
+<div class="result-wrapper">
+
+    <div class="result-card" id="resultBox">
+        <!-- JS insert content -->
+    </div>
+
+    <a href="index.html" class="back-link">🏠 Kembali ke Menu Utama</a>
+
+</div>
+
+<script>
+    const p = new URLSearchParams(window.location.search);
+
+    const betul = Number(p.get("betul"));
+    const salah = Number(p.get("salah"));
+    const acc   = Number(p.get("acc"));
+
+    // Tentukan bilangan bintang
+    let stars = 0;
+    if (acc >= 90) stars = 3;
+    else if (acc >= 70) stars = 2;
+    else if (acc >= 40) stars = 1;
+    else stars = 0;
+
+    // Tentukan feedback motivasi
+    let feedback = "";
+    if (stars === 3) feedback = "Hebat! Terbaik! 👍";
+    else if (stars === 2) feedback = "Bagus! Teruskan usaha! 👏";
+    else if (stars === 1) feedback = "Teruskan usaha! Cuba lagi! 💪";
+    else feedback = "Jangan putus asa! Teruskan mencuba! 🌟";
+
+    // Generate bintang
+    const starHTML = `
+        <span class="${stars >= 1 ? 'star-active' : 'star-inactive'}">★</span>
+        <span class="${stars >= 2 ? 'star-active' : 'star-inactive'}">★</span>
+        <span class="${stars >= 3 ? 'star-active' : 'star-inactive'}">★</span>
+    `;
+
+    // Output ke card
+    document.getElementById("resultBox").innerHTML = `
+        <p><strong>Betul:</strong> ${betul}</p>
+        <p><strong>Salah:</strong> ${salah}</p>
+
+        <div class="label-bintang">Anda dapat</div>
+        <div class="stars">${starHTML}</div>
+        <div class="feedback-text">${feedback}</div>
+    `;
+</script>
+
+</body>
+</html>

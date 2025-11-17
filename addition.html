@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tambah Dengan Bawa</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Operasi Tambah</title>
+
 
 <!-- CSS KHAS UNTUK TAMBAH (modular, tak kacau page lain) -->
 <style>
@@ -66,9 +67,11 @@
 
 <body>
 
-<h2>🧮 Tambah Dengan Bawa (Interaktif)</h2>
+<h2 class="page-title">➕ Operasi Tambah</h2>
 
 <!-- Carry box (JS akan align tepat atas puluhTop) -->
+<div id="hud" style="display:none; font-size:20px; margin-bottom:10px; font-weight:600;"></div>
+
 <div id="carryContainer">
   <div class="carry-box" id="carryPuluh">&nbsp;</div>
 </div>
@@ -94,30 +97,36 @@
   <div class="dropzone" id="ansSa">_</div>
 </div>
 
-<!-- NOMBOR -->
-<div id="numberPad" style="margin-top:30px;">
-  <p><strong>Seret nombor ke kotak jawapan:</strong></p>
+<!-- NUMBER PAD WRAPPER (UNTUK TOGGLE FEEDBACK / NUMBERPAD) -->
 
-  <div class="num-container">
-    <div class="num" draggable="true">0</div>
-    <div class="num" draggable="true">1</div>
-    <div class="num" draggable="true">2</div>
-    <div class="num" draggable="true">3</div>
-    <div class="num" draggable="true">4</div>
-    <div class="num" draggable="true">5</div>
-    <div class="num" draggable="true">6</div>
-    <div class="num" draggable="true">7</div>
-    <div class="num" draggable="true">8</div>
-    <div class="num" draggable="true">9</div>
-  </div>
+
+    <div id="numberPad">
+        <p><strong>Seret nombor ke kotak jawapan:</strong></p>
+
+        <div class="num-container">
+            <div class="num" draggable="true">0</div>
+            <div class="num" draggable="true">1</div>
+            <div class="num" draggable="true">2</div>
+            <div class="num" draggable="true">3</div>
+            <div class="num" draggable="true">4</div>
+            <div class="num" draggable="true">5</div>
+            <div class="num" draggable="true">6</div>
+            <div class="num" draggable="true">7</div>
+            <div class="num" draggable="true">8</div>
+            <div class="num" draggable="true">9</div>
+        </div>
+    </div>
+
+    <div id="feedback" style="display:none;"></div>
+
 </div>
 
-<button onclick="cekJawapan()">Cek Jawapan</button>
+
+<button onclick="cekJawapan()">Semak Jawapan</button>
 <button onclick="soalanBaru()">🔁 Soalan Baru</button>
 
-<a href="index.html" class="back-link">🏠 Kembali Menu</a>
+<a href="index.html" class="back-link">🏠 Kembali ke Menu Utama</a>
 
-<div id="feedback"></div>
 
 <script src="add_script.js"></script>
 

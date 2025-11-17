@@ -3,19 +3,54 @@ document.addEventListener("DOMContentLoaded", () => {
   let sudahPinjam = false;
   let floatingText = null;
 
+  // ========================
+  // 📘 QUIZ MODE VARIABLES
+  // ========================
+  let quizMode = false;
+  let score = 0;
+  let totalSoalan = 5;
+  let currentSoalan = 0;
+
+  // ambil parameter dari URL
+  const url = new URLSearchParams(window.location.search);
+  if (url.get("quiz") === "1") {
+      quizMode = true;
+      totalSoalan = Number(url.get("q")) || 5;
+
+      // hide normal buttons
+      document.getElementById("btnCek").style.display = "none";
+      document.getElementById("btnBaru").style.display = "none";
+  }
+
   const puluhBox = document.getElementById("puluhTop");
   const saBox = document.getElementById("saTop");
   const puluhBottomBox = document.getElementById("puluhBottom");
   const saBottomBox = document.getElementById("saBottom");
   const feedback = document.getElementById("feedback");
+  const numberPad = document.getElementById("numberPad");
+  const hud = document.getElementById("hud");
 
   // ============================
   // 🧮 JANA SOALAN BARU
   // ============================
   function soalanBaru() {
-    sudahPinjam = false;
+    feedback.style.display = "none";
     feedback.textContent = "";
-    feedback.style.color = "black";
+    sudahPinjam = false;
+
+    if (quizMode) {
+      currentSoalan++;
+      if (currentSoalan > totalSoalan) {
+        tamatQuiz();
+        return;
+      }
+
+      // HUD UPDATE
+      hud.style.display = "block";   // 🔥 WAJIB — TAMBAH INI
+      hud.textContent = `Soalan ${currentSoalan} / ${totalSoalan}`;
+    } else {
+      hud.textContent = ""; // normal mode
+    }
 
     const perluPinjam = Math.random() < 0.5;
 
@@ -53,7 +88,24 @@ document.addEventListener("DOMContentLoaded", () => {
   soalanBaru();
 
   // ============================
-  // 🖱️ DRAG START (DESKTOP)
+  // QUIZ END → redirect result
+  // ============================
+  function tamatQuiz() {
+    document.getElementById("btnCek").style.display = "inline-block";
+    document.getElementById("btnBaru").style.display = "inline-block";
+
+    quizMode = false;
+    hud.textContent = "";
+
+    let betul = score;
+    let salah = totalSoalan - score;
+    let acc = Math.round((betul / totalSoalan) * 100);
+
+    location.href = `quiz_result.html?betul=${betul}&salah=${salah}&acc=${acc}`;
+  }
+
+  // ============================
+  // DRAG PINJAM (DESKTOP)
   // ============================
   puluhBox.addEventListener("dragstart", e => {
     if (sudahPinjam || saTop >= saBottom) {
@@ -72,45 +124,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     puluhBox.textContent = puluhTop - 1;
     puluhBox.classList.add("red");
-    e.dataTransfer.setData("text/plain", "10+");
   });
 
   window.addEventListener("dragover", e => {
-    if (!floatingText) return;
-    floatingText.style.left = e.pageX + 40 + "px";
-    floatingText.style.top = e.pageY - 30 + "px";
+    if (floatingText) {
+      floatingText.style.left = e.pageX + 40 + "px";
+      floatingText.style.top = e.pageY - 30 + "px";
+    }
   });
 
   saBox.addEventListener("dragover", e => e.preventDefault());
   saBox.addEventListener("dragenter", e => {
-    e.preventDefault();
     if (!sudahPinjam) {
       saBox.classList.add("preview");
       saBox.textContent = saTop + 10;
-      if (floatingText) floatingText.textContent = `10+${saTop}`;
     }
   });
 
   saBox.addEventListener("dragleave", e => {
-    e.preventDefault();
     if (!sudahPinjam) {
       saBox.classList.remove("preview");
       saBox.textContent = saTop;
-      if (floatingText) floatingText.textContent = "10+";
     }
   });
 
   saBox.addEventListener("drop", e => {
-    e.preventDefault();
     if (sudahPinjam) return;
+
     puluhTop -= 1;
     saTop += 10;
     sudahPinjam = true;
 
     puluhBox.textContent = puluhTop;
     saBox.textContent = saTop;
-    puluhBox.classList.add("red");
+
     saBox.classList.add("green");
+    puluhBox.classList.add("red");
     saBox.classList.remove("preview");
 
     if (floatingText) floatingText.remove();
@@ -120,18 +169,16 @@ document.addEventListener("DOMContentLoaded", () => {
   puluhBox.addEventListener("dragend", () => {
     if (!sudahPinjam) {
       puluhBox.textContent = puluhTop;
-      puluhBox.classList.remove("red");
       saBox.textContent = saTop;
       saBox.classList.remove("preview");
+      puluhBox.classList.remove("red");
     }
-    if (floatingText) {
-      floatingText.remove();
-      floatingText = null;
-    }
+    if (floatingText) floatingText.remove();
+    floatingText = null;
   });
 
   // ============================
-  // 🔢 DRAG & DROP JAWAPAN (DESKTOP)
+  // DROP ANSWER (DESKTOP)
   // ============================
   const nums = document.querySelectorAll(".num");
   nums.forEach(num => {
@@ -149,11 +196,24 @@ document.addEventListener("DOMContentLoaded", () => {
       drop.textContent = data;
       drop.style.color = "#000";
       drop.style.borderColor = "#4CAF50";
+
+      // 🔥 QUIZ MODE FIX: auto-next only when BOTH boxes filled
+      if (quizMode) {
+        const p = document.getElementById("ansPuluh").textContent.trim();
+        const s = document.getElementById("ansSa").textContent.trim();
+
+        const ready = /^[0-9]$/.test(p) && /^[0-9]$/.test(s);
+
+        if (ready) {
+          setTimeout(() => cekJawapan(), 120);
+        }
+      }
+
     });
   });
 
   // ============================
-  // ✅ SEMAK JAWAPAN
+  // CEK JAWAPAN
   // ============================
   function cekJawapan() {
     const ansPuluh = document.getElementById("ansPuluh").textContent.trim();
@@ -167,187 +227,26 @@ document.addEventListener("DOMContentLoaded", () => {
       puluhResult = puluhTop - 1 - puluhBottom;
     }
 
-    if (ansPuluh == puluhResult && ansSa == saResult) {
-      feedback.textContent = "✅ Betul! Hebat!";
+    const betul = (ansPuluh == puluhResult && ansSa == saResult);
+
+    if (quizMode) {
+      if (betul) score++;
+      setTimeout(() => soalanBaru(), 260);
+      return;
+    }
+
+    // ========= NORMAL MODE =========
+    feedback.style.display = "block";
+
+    if (betul) {
+      feedback.textContent = "✅ Betul!";
       feedback.style.color = "green";
     } else {
-      feedback.textContent = `❌ Salah! Jawapan sebenar ialah ${puluhResult}${saResult}`;
+      feedback.textContent = `❌ Salah! Jawapan: ${puluhResult}${saResult}`;
       feedback.style.color = "red";
     }
   }
 
   window.cekJawapan = cekJawapan;
   window.soalanBaru = soalanBaru;
-
-  // ============================
-  // 📱 SOKONGAN SENTUHAN (iPad/iPhone)
-  // ============================
-  if ('ontouchstart' in window) {
-    document.querySelectorAll('[draggable="true"]').forEach(el => el.removeAttribute('draggable'));
-  }
-
-  // --- Pinjam (puluhTop → saTop) ---
-  let pinjamTouchStart = null;
-
-  puluhBox.addEventListener("touchstart", e => {
-    if (sudahPinjam || saTop >= saBottom) return;
-    pinjamTouchStart = e.touches[0];
-    puluhBox.classList.add("red");
-
-    floatingText = document.createElement("div");
-    floatingText.className = "floating10";
-    floatingText.textContent = "10+";
-    document.body.appendChild(floatingText);
-  });
-
-  puluhBox.addEventListener("touchmove", e => {
-    if (!pinjamTouchStart || !floatingText) return;
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    floatingText.style.left = touch.pageX + 60 + "px";
-    floatingText.style.top = touch.pageY - 80 + "px";
-    floatingText.style.zIndex = "9999";
-
-    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!elem) {
-      const dx = [0, -1, 1, -2, 2];
-      for (const x of dx) {
-        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
-        if (elem) break;
-      }
-    }
-
-    const saTarget = elem && (elem.id === "saTop" || elem.closest("#saTop"));
-    if (saTarget && !sudahPinjam) {
-      saBox.classList.add("preview");
-      saBox.textContent = saTop + 10;
-      floatingText.textContent = `10+${saTop}`;
-    } else {
-      saBox.classList.remove("preview");
-      saBox.textContent = saTop;
-      floatingText.textContent = "10+";
-    }
-  });
-
-  puluhBox.addEventListener("touchend", e => {
-    if (!pinjamTouchStart) return;
-
-    const touch = e.changedTouches[0];
-    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-
-    if (!elem) {
-      const dx = [0, -1, 1, -2, 2];
-      for (const x of dx) {
-        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
-        if (elem) break;
-      }
-    }
-
-    const saTarget = elem && (elem.id === "saTop" || elem.closest("#saTop"));
-    if (saTarget && !sudahPinjam) {
-      puluhTop -= 1;
-      saTop += 10;
-      sudahPinjam = true;
-
-      puluhBox.textContent = puluhTop;
-      saBox.textContent = saTop;
-      puluhBox.classList.add("red");
-      saBox.classList.add("green");
-      saBox.classList.remove("preview");
-    } else {
-      puluhBox.textContent = puluhTop;
-      puluhBox.classList.remove("red");
-      saBox.textContent = saTop;
-      saBox.classList.remove("preview");
-    }
-
-    if (floatingText) {
-      floatingText.remove();
-      floatingText = null;
-    }
-
-    pinjamTouchStart = null;
-  });
-
-  // --- Drag Jawapan (Touch + Floating Preview) ---
-  const draggables = document.querySelectorAll(".num");
-  let activeFloat = null;
-
-  draggables.forEach(num => {
-    num.addEventListener("touchstart", e => {
-      e.preventDefault();
-      num.classList.add("dragging");
-
-      if (activeFloat) activeFloat.remove();
-      activeFloat = document.createElement("div");
-      activeFloat.className = "floating10";
-      activeFloat.textContent = num.textContent;
-      document.body.appendChild(activeFloat);
-
-      const touch = e.touches[0];
-      activeFloat.style.left = touch.pageX + 60 + "px";
-      activeFloat.style.top = touch.pageY - 80 + "px";
-      activeFloat.style.zIndex = "9999";
-    });
-
-    num.addEventListener("touchmove", e => {
-      e.preventDefault();
-
-      const touch = e.touches[0];
-      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dropzone = elem?.closest(".dropzone");
-
-      if (activeFloat) {
-        activeFloat.style.left = touch.pageX + 60 + "px";
-        activeFloat.style.top = touch.pageY - 80 + "px";
-      }
-
-      document.querySelectorAll(".dropzone").forEach(z => {
-        z.style.borderColor = "#333";
-        z.style.opacity = "1";
-        z.classList.remove("previewing");
-        if (!z.textContent.trim()) z.textContent = "_";
-      });
-
-      if (dropzone) {
-        dropzone.style.borderColor = "#4CAF50";
-        dropzone.style.background = "#e6ffe6";
-        dropzone.textContent = num.textContent;
-        dropzone.style.opacity = "0.6";
-        dropzone.classList.add("previewing");
-      }
-    });
-
-    num.addEventListener("touchend", e => {
-      const touch = e.changedTouches[0];
-      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dropzone = elem?.closest(".dropzone");
-
-      if (dropzone) {
-        dropzone.textContent = num.textContent;
-        dropzone.style.color = "#000";
-        dropzone.style.borderColor = "#4CAF50";
-        dropzone.style.background = "#fff";
-      }
-
-      if (activeFloat) {
-        activeFloat.style.transition = "opacity 0.3s ease";
-        activeFloat.style.opacity = "0";
-        setTimeout(() => {
-          activeFloat.remove();
-          activeFloat = null;
-        }, 300);
-      }
-
-      document.querySelectorAll(".dropzone").forEach(z => {
-        z.style.borderColor = "#333";
-        z.style.opacity = "1";
-        z.classList.remove("previewing");
-        z.style.background = "#fafafa";
-      });
-
-      num.classList.remove("dragging");
-    });
-  });
 });

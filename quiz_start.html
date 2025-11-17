@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Mula Quiz</title>
+<script>
+    // ambil parameter
+    const params = new URLSearchParams(window.location.search);
+    const op = params.get("op");
+    const q = params.get("q");
+
+    // kalau tiada op, balik menu quiz
+    if (!op || !q) {
+        location.href = "quiz_menu.html";
+    }
+
+    // redirect berdasarkan operasi
+    if (op === "tambah") {
+        location.href = `addition.html?quiz=1&q=${q}&op=tambah`;
+    }
+    else if (op === "tolak") {
+        location.href = `subtraction.html?quiz=1&q=${q}&op=tolak`;
+    }
+    
+</script>
+</head>
+<body>
+</body>
+</html>

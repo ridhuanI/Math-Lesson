@@ -1,4 +1,39 @@
+// ---------------------------
+// add_script.js (patched)
+// ---------------------------
 document.addEventListener("DOMContentLoaded", () => {
+
+    // QUIZ MODE FLAGS
+    let quizMode = false;
+    let totalQuestions = 0;
+    let currentQ = 0;
+    let scoreQ = 0;
+    let quizOp = "";   // tambah / tolak / mix
+
+    // =====================================================
+    // ELEMENT REFS (declare early so quiz param code can use them)
+    // =====================================================
+    const hud = document.getElementById("hud");
+    const numberPad = document.getElementById("numberPad");
+    const feedback = document.getElementById("feedback");
+
+    // QUIZ PARAM DETECTOR (after element refs exist)
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("quiz") === "1") {
+        quizMode = true;
+        totalQuestions = Number(params.get("q")) || 10;
+        quizOp = params.get("op") || "tambah";
+
+        if (hud) hud.style.display = "block";
+        if (feedback) feedback.style.display = "none";  // disable normal feedback panel
+
+        // hide the manual buttons if they exist
+        const cekBtn = document.querySelector('button[onclick="cekJawapan()"]');
+        const newQBtn = document.querySelector('button[onclick="soalanBaru()"]');
+        if (cekBtn) cekBtn.style.display = "none";
+        if (newQBtn) newQBtn.style.display = "none";
+    }
 
     // =====================================================
     // VARIABLE DECLARATIONS
@@ -11,13 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const puluhBottomBox  = document.getElementById("puluhBottom");
     const saBottomBox     = document.getElementById("saBottom");
     const carryBox        = document.getElementById("carryPuluh");
-    const feedback        = document.getElementById("feedback");
-
 
     // =====================================================
     // ALIGN CARRY BOX EXACT POSITION
     // =====================================================
     function alignCarryBox() {
+        if (!puluhBox || !carryBox) return;
         const puluhRect     = puluhBox.getBoundingClientRect();
         const containerRect = document.getElementById("carryContainer").getBoundingClientRect();
 
@@ -25,16 +59,30 @@ document.addEventListener("DOMContentLoaded", () => {
             (puluhRect.x + puluhRect.width / 2 - containerRect.x - 20) + "px";
     }
 
-
     // =====================================================
     // GENERATE QUESTION (<100 RESULT)
     // =====================================================
     function soalanBaru() {
+        if (quizMode) {
+            currentQ++;
+
+            if (currentQ > totalQuestions) {
+                tamatQuiz();
+                return;
+            }
+
+            updateHUD();
+        }
+
+        if (feedback) feedback.style.display = "none";
+        if (numberPad) numberPad.style.display = "block";
         sudahBawa = false;
-        feedback.textContent = "";
-        carryBox.innerHTML = "&nbsp;";
-        carryBox.style.display = "none";
-        carryBox.style.opacity = "0";
+        if (feedback) feedback.textContent = "";
+        if (carryBox) {
+            carryBox.style.display = "none";
+            carryBox.style.opacity = "0";
+            carryBox.textContent = "";
+        }
 
         while (true) {
             puluhTop     = Math.floor(Math.random() * 9);
@@ -49,19 +97,34 @@ document.addEventListener("DOMContentLoaded", () => {
             if (puluhTotal < 10) break;
         }
 
-        puluhBox.textContent       = puluhTop;
-        saBox.textContent          = saTop;
-        puluhBottomBox.textContent = puluhBottom;
-        saBottomBox.textContent    = saBottom;
+        if (puluhBox) puluhBox.textContent       = puluhTop;
+        if (saBox) saBox.textContent             = saTop;
+        if (puluhBottomBox) puluhBottomBox.textContent = puluhBottom;
+        if (saBottomBox) saBottomBox.textContent = saBottom;
 
         document.querySelectorAll(".dropzone").forEach(z => {
             z.textContent     = "_";
             z.style.color     = "#999";
             z.style.borderColor = "#333";
+            z.style.background = "";
         });
 
-        setTimeout(alignCarryBox, 30);
+        requestAnimationFrame(alignCarryBox);
     }
+
+    function updateHUD() {
+        if (!hud) return;
+        hud.textContent = `Soalan ${currentQ} / ${totalQuestions}`;
+    }
+
+    function tamatQuiz() {
+        const wrong = totalQuestions - scoreQ;
+        const acc = Math.round((scoreQ / totalQuestions) * 100);
+
+        // Redirect ke quiz_result.html
+        location.href = `quiz_result.html?betul=${scoreQ}&salah=${wrong}&acc=${acc}`;
+    }
+
 
     soalanBaru();
 
@@ -84,7 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
         drop.addEventListener("drop", e => {
             e.preventDefault();
 
-            const data = parseInt(e.dataTransfer.getData("text/plain"));
+            const raw = e.dataTransfer.getData("text/plain");
+            const data = isNaN(parseInt(raw, 10)) ? raw : parseInt(raw, 10);
+
             drop.textContent     = data;
             drop.style.color     = "#000";
             drop.style.borderColor = "#4CAF50";
@@ -94,6 +159,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (jumlahSa >= 10 && !sudahBawa) {
                     sudahBawa = true;
                     tunjukCarry();
+                }
+            }
+
+            // ===== QUIZ MODE AUTO-CHECK AFTER EACH DROP =====
+            if (quizMode) {
+                const puluhFilled = document.getElementById("ansPuluh").textContent.trim() !== "_";
+                const saFilled    = document.getElementById("ansSa").textContent.trim() !== "_";
+
+                if (puluhFilled && saFilled) {
+                    // run cekJawapan silently (it already handles quizMode branch)
+                    cekJawapan();
                 }
             }
         });
@@ -119,15 +195,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         puluhSum += carry;
 
+        // ============================================
+        // 🔥 QUIZ MODE OVERRIDE (NO FEEDBACK)
+        // ============================================
+
+        if (quizMode) {
+
+            // Kira markah senyap
+            if (ansPuluh == puluhSum && ansSa == saSum) {
+                scoreQ++;
+            }
+
+            // Auto soalan baru
+            setTimeout(() => {
+                soalanBaru();
+            }, 200);
+
+            return; // STOP behaviour biasa!
+        }
+
+        // ============================================
+        // NORMAL MODE (WITH FEEDBACK)
+        // ============================================
+
+        // Hide number pad, show feedback panel
+        if (numberPad) numberPad.style.display = "none";
+        if (feedback) feedback.style.display = "block";
+
         if (ansPuluh == puluhSum && ansSa == saSum) {
             feedback.textContent = "✅ Betul! Hebat!";
             feedback.style.color = "green";
         } else {
-            feedback.textContent =
-                `❌ Salah! Jawapan sebenar ialah ${puluhSum}${saSum}`;
+            feedback.textContent = `❌ Salah! Jawapan sebenar ialah ${puluhSum}${saSum}`;
             feedback.style.color = "red";
         }
     }
+
 
     window.cekJawapan = cekJawapan;
     window.soalanBaru = soalanBaru;
@@ -137,6 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // SUPER SMOOTH CURVED +10 FLY ANIMATION
     // =====================================================
     function tunjukCarry() {
+
+        if (!carryBox || !saBox) return;
 
         // Make carryBox visible (but invisible initially)
         carryBox.style.display = "block";
@@ -272,6 +377,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 z.style.opacity    = "1";
                 z.style.borderColor = "#333";
             });
+
+            // touch: after placing a digit, auto-check for quiz
+            if (quizMode) {
+                const puluhFilled = document.getElementById("ansPuluh").textContent.trim() !== "_";
+                const saFilled    = document.getElementById("ansSa").textContent.trim() !== "_";
+
+                if (puluhFilled && saFilled) {
+                    cekJawapan();
+                }
+            }
         });
 
     });

@@ -1,7 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+/* OFFLINE LOCAL FONTS */
+@font-face {
+  font-family: 'Baloo2';
+  src: url('assets/fonts/Baloo2-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Baloo2';
+  src: url('assets/fonts/Baloo2-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Baloo2';
+  src: url('assets/fonts/Baloo2-Bold.ttf') format('truetype');
+  font-weight: 700;
+}
+
+/* FORCE ALL ELEMENTS USE SAME FONT */
+* {
+  font-family: 'Baloo2', sans-serif !important;
+}
+
 
 body {
-  font-family: 'Comic Neue', 'Arial Rounded MT Bold', 'Poppins', sans-serif;
   text-align: center;
   background: #fffaf0;
   margin-top: 40px;
@@ -10,6 +32,15 @@ body {
 h2 {
   color: #ff6600;
   margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 30px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #ff7a00;
+    font-weight: 700;
+    text-align: center;
 }
 
 /* Layout utama */
@@ -66,19 +97,12 @@ h2 {
   color: #000;
   user-select: none;
   pointer-events: none;
+  
+  width: 40px;          /* kecilkan bounding box */
+  height: 50px;
+  overflow: visible; 
 }
 
-.plus {
-  position: absolute;
-  left: calc(50% - 100px);
-  top: 50%;
-  transform: translate(-100%, -50%);
-  font-size: 50px;
-  font-weight: bold;
-  color: #000;
-  user-select: none;
-  pointer-events: none;
-}
 
 
 /* Warna khas */
@@ -187,13 +211,24 @@ button {
 }
 
 
-  .num {
+.num {
     width: 45px;
     height: 45px;
     font-size: 24px;
-  }
-
-  .garis {
-    width: 170px;
-  }
 }
+
+.garis {
+    width: 170px;
+}
+
+#numberPadWrapper {
+    margin-top: 20px;
+}
+
+#feedback {
+    display: none;
+    font-size: 26px;
+    font-weight: bold;
+    padding: 15px 0;
+}
+
