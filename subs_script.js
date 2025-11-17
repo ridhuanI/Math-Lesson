@@ -1,359 +1,471 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let puluhTop, saTop, puluhBottom, saBottom;
-  let sudahPinjam = false;
-  let floatingText = null;
 
-  const puluhBox = document.getElementById("puluhTop");
-  const saBox = document.getElementById("saTop");
-  const puluhBottomBox = document.getElementById("puluhBottom");
-  const saBottomBox = document.getElementById("saBottom");
-  const feedback = document.getElementById("feedback");
+    // =============================
+    // VARIABLES
+    // =============================
+    let puluhTop, saTop, puluhBottom, saBottom;
+    let sudahPinjam = false;
+    let previewPuluhDeducted = false;
 
-  // ============================
-  // 🧮 JANA SOALAN BARU
-  // ============================
-  function soalanBaru() {
-    feedback.style.display = "none";
-    numberPad.style.display = "block";
-    sudahPinjam = false;
-    feedback.textContent = "";
-    feedback.style.color = "black";
+    let floatBorrow = null;
+    let rafId = null;
+    let targetPos = { x: 0, y: 0 };
+    let currentPos = { x: 0, y: 0 };
+    let isTouchBorrow = false;
 
-    const perluPinjam = Math.random() < 0.5;
+    // QUIZ VARS
+    let quizMode = false;
+    let score = 0;
+    let totalSoalan = 5;
+    let currentSoalan = 0;
 
-    if (perluPinjam) {
-      do {
-        puluhTop = Math.floor(Math.random() * 8) + 2;
-        puluhBottom = Math.floor(Math.random() * puluhTop);
-        saBottom = Math.floor(Math.random() * 9) + 1;
-        saTop = Math.floor(Math.random() * saBottom);
-      } while (saTop >= saBottom);
-    } else {
-      do {
-        puluhTop = Math.floor(Math.random() * 8) + 2;
-        puluhBottom = Math.floor(Math.random() * puluhTop);
-        saTop = Math.floor(Math.random() * 9) + 1;
-        saBottom = Math.floor(Math.random() * saTop);
-      } while (saTop < saBottom);
+    // =============================
+    // QUIZ PARAM CHECK
+    // =============================
+    const url = new URLSearchParams(window.location.search);
+    if (url.get("quiz") === "1") {
+        quizMode = true;
+        totalSoalan = Number(url.get("q")) || 5;
+
+        const b1 = document.getElementById("btnCek");
+        const b2 = document.getElementById("btnBaru");
+        if (b1) b1.style.display = "none";
+        if (b2) b2.style.display = "none";
     }
 
-    puluhBox.textContent = puluhTop;
-    saBox.textContent = saTop;
-    puluhBottomBox.textContent = puluhBottom;
-    saBottomBox.textContent = saBottom;
+    // =============================
+    // ELEMENTS
+    // =============================
+    const puluhBox = document.getElementById("puluhTop");
+    const saBox = document.getElementById("saTop");
+    const puluhBottomBox = document.getElementById("puluhBottom");
+    const saBottomBox = document.getElementById("saBottom");
+    const hud = document.getElementById("hud");
+    const feedback = document.getElementById("feedback");
 
-    puluhBox.classList.remove("red", "green");
-    saBox.classList.remove("red", "green", "preview");
-
-    document.querySelectorAll(".dropzone").forEach(z => {
-      z.textContent = "_";
-      z.style.color = "#999";
-      z.style.borderColor = "#333";
-    });
-  }
-
-  soalanBaru();
-
-  // ============================
-  // 🖱️ DRAG START (DESKTOP)
-  // ============================
-  puluhBox.addEventListener("dragstart", e => {
-    if (sudahPinjam || saTop >= saBottom) {
-      e.preventDefault();
-      return;
+    // Disable draggable on touch devices
+    if ("ontouchstart" in window) {
+        document.querySelectorAll(".num, #puluhTop").forEach(el =>
+            el.removeAttribute("draggable")
+        );
     }
 
-    floatingText = document.createElement("div");
-    floatingText.className = "floating10";
-    floatingText.textContent = "10+";
-    document.body.appendChild(floatingText);
+    // =============================
+    // SAFE ELEMENT-FROM-POINT
+    // =============================
+    function elementFromPointSafe(x, y) {
+        let el = document.elementFromPoint(x, y);
+        if (el) return el;
 
-    const img = new Image();
-    img.src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
-    e.dataTransfer.setDragImage(img, 0, 0);
-
-    puluhBox.textContent = puluhTop - 1;
-    puluhBox.classList.add("red");
-    e.dataTransfer.setData("text/plain", "10+");
-  });
-
-  window.addEventListener("dragover", e => {
-    if (!floatingText) return;
-    floatingText.style.left = e.pageX + 40 + "px";
-    floatingText.style.top = e.pageY - 30 + "px";
-  });
-
-  saBox.addEventListener("dragover", e => e.preventDefault());
-  saBox.addEventListener("dragenter", e => {
-    e.preventDefault();
-    if (!sudahPinjam) {
-      saBox.classList.add("preview");
-      saBox.textContent = saTop + 10;
-      if (floatingText) floatingText.textContent = `10+${saTop}`;
-    }
-  });
-
-  saBox.addEventListener("dragleave", e => {
-    e.preventDefault();
-    if (!sudahPinjam) {
-      saBox.classList.remove("preview");
-      saBox.textContent = saTop;
-      if (floatingText) floatingText.textContent = "10+";
-    }
-  });
-
-  saBox.addEventListener("drop", e => {
-    e.preventDefault();
-    if (sudahPinjam) return;
-    puluhTop -= 1;
-    saTop += 10;
-    sudahPinjam = true;
-
-    puluhBox.textContent = puluhTop;
-    saBox.textContent = saTop;
-    puluhBox.classList.add("red");
-    saBox.classList.add("green");
-    saBox.classList.remove("preview");
-
-    if (floatingText) floatingText.remove();
-    floatingText = null;
-  });
-
-  puluhBox.addEventListener("dragend", () => {
-    if (!sudahPinjam) {
-      puluhBox.textContent = puluhTop;
-      puluhBox.classList.remove("red");
-      saBox.textContent = saTop;
-      saBox.classList.remove("preview");
-    }
-    if (floatingText) {
-      floatingText.remove();
-      floatingText = null;
-    }
-  });
-
-  // ============================
-  // 🔢 DRAG & DROP JAWAPAN (DESKTOP)
-  // ============================
-  const nums = document.querySelectorAll(".num");
-  nums.forEach(num => {
-    num.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text/plain", num.textContent);
-    });
-  });
-
-  const drops = document.querySelectorAll(".dropzone");
-  drops.forEach(drop => {
-    drop.addEventListener("dragover", e => e.preventDefault());
-    drop.addEventListener("drop", e => {
-      e.preventDefault();
-      const data = e.dataTransfer.getData("text/plain");
-      drop.textContent = data;
-      drop.style.color = "#000";
-      drop.style.borderColor = "#4CAF50";
-    });
-  });
-
-  // ============================
-  // ✅ SEMAK JAWAPAN
-  // ============================
-  function cekJawapan() {
-    const ansPuluh = document.getElementById("ansPuluh").textContent.trim();
-    const ansSa = document.getElementById("ansSa").textContent.trim();
-
-    let saResult = saTop - saBottom;
-    let puluhResult = puluhTop - puluhBottom;
-
-    if (!sudahPinjam && saTop < saBottom) {
-      saResult = saTop + 10 - saBottom;
-      puluhResult = puluhTop - 1 - puluhBottom;
+        const d = [1, -1, 2, -2];
+        for (let dx of d) {
+            for (let dy of d) {
+                el = document.elementFromPoint(x + dx, y + dy);
+                if (el) return el;
+            }
+        }
+        return null;
     }
 
-    // 🔥 HIDE numberPad, SHOW feedback
-    numberPad.style.display = "none";
-    feedback.style.display  = "block";
-
-    if (ansPuluh == puluhResult && ansSa == saResult) {
-      feedback.textContent = "✅ Betul! Hebat!";
-      feedback.style.color = "green";
-    } else {
-      feedback.textContent = `❌ Salah! Jawapan sebenar ialah ${puluhResult}${saResult}`;
-      feedback.style.color = "red";
-    }
-  }
-
-  window.cekJawapan = cekJawapan;
-  window.soalanBaru = soalanBaru;
-
-  // ============================
-  // 📱 SOKONGAN SENTUHAN (iPad/iPhone)
-  // ============================
-  if ('ontouchstart' in window) {
-    document.querySelectorAll('[draggable="true"]').forEach(el => el.removeAttribute('draggable'));
-  }
-
-  // --- Pinjam (puluhTop → saTop) ---
-  let pinjamTouchStart = null;
-
-  puluhBox.addEventListener("touchstart", e => {
-    if (sudahPinjam || saTop >= saBottom) return;
-    pinjamTouchStart = e.touches[0];
-    puluhBox.classList.add("red");
-
-    floatingText = document.createElement("div");
-    floatingText.className = "floating10";
-    floatingText.textContent = "10+";
-    document.body.appendChild(floatingText);
-  });
-
-  puluhBox.addEventListener("touchmove", e => {
-    if (!pinjamTouchStart || !floatingText) return;
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    floatingText.style.left = touch.pageX + 60 + "px";
-    floatingText.style.top = touch.pageY - 80 + "px";
-    floatingText.style.zIndex = "9999";
-
-    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!elem) {
-      const dx = [0, -1, 1, -2, 2];
-      for (const x of dx) {
-        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
-        if (elem) break;
-      }
+    // =============================
+    // HUD
+    // =============================
+    function setHUD(t) {
+        if (!hud) return;
+        hud.style.display = t ? "block" : "none";
+        hud.textContent = t || "";
     }
 
-    const saTarget = elem && (elem.id === "saTop" || elem.closest("#saTop"));
-    if (saTarget && !sudahPinjam) {
-      saBox.classList.add("preview");
-      saBox.textContent = saTop + 10;
-      floatingText.textContent = `10+${saTop}`;
-    } else {
-      saBox.classList.remove("preview");
-      saBox.textContent = saTop;
-      floatingText.textContent = "10+";
-    }
-  });
-
-  puluhBox.addEventListener("touchend", e => {
-    if (!pinjamTouchStart) return;
-
-    const touch = e.changedTouches[0];
-    let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-
-    if (!elem) {
-      const dx = [0, -1, 1, -2, 2];
-      for (const x of dx) {
-        elem = document.elementFromPoint(touch.clientX + x, touch.clientY);
-        if (elem) break;
-      }
+    // =============================
+    // RENDER NUMBERS
+    // =============================
+    function renderNumbers() {
+        puluhBox.textContent = previewPuluhDeducted ? puluhTop - 1 : puluhTop;
+        saBox.textContent = saTop;
+        puluhBottomBox.textContent = puluhBottom;
+        saBottomBox.textContent = saBottom;
     }
 
-    const saTarget = elem && (elem.id === "saTop" || elem.closest("#saTop"));
-    if (saTarget && !sudahPinjam) {
-      puluhTop -= 1;
-      saTop += 10;
-      sudahPinjam = true;
+    // =============================
+    // NEW QUESTION
+    // =============================
+    function soalanBaru() {
 
-      puluhBox.textContent = puluhTop;
-      saBox.textContent = saTop;
-      puluhBox.classList.add("red");
-      saBox.classList.add("green");
-      saBox.classList.remove("preview");
-    } else {
-      puluhBox.textContent = puluhTop;
-      puluhBox.classList.remove("red");
-      saBox.textContent = saTop;
-      saBox.classList.remove("preview");
+        feedback.style.display = "none";
+
+        sudahPinjam = false;
+        previewPuluhDeducted = false;
+
+        // RESET COLOR STATE (patch)
+        puluhBox.classList.remove("red");
+        saBox.classList.remove("green");
+        saBox.classList.remove("preview");
+        puluhBox.style.color = "";
+        saBox.style.color = "";
+
+        if (quizMode) {
+            currentSoalan++;
+            if (currentSoalan > totalSoalan) {
+                const betul = score;
+                const salah = totalSoalan - score;
+                const acc = Math.round((betul / totalSoalan) * 100);
+                location.href =
+                    `quiz_result.html?betul=${betul}&salah=${salah}&acc=${acc}`;
+                return;
+            }
+            setHUD(`Soalan ${currentSoalan} / ${totalSoalan}`);
+        } else {
+            setHUD("");
+        }
+
+        const perluPinjam = Math.random() < 0.5;
+
+        if (perluPinjam) {
+            do {
+                puluhTop = Math.floor(Math.random() * 8) + 2;
+                puluhBottom = Math.floor(Math.random() * puluhTop);
+                saBottom = Math.floor(Math.random() * 9) + 1;
+                saTop = Math.floor(Math.random() * saBottom);
+            } while (saTop >= saBottom);
+        } else {
+            do {
+                puluhTop = Math.floor(Math.random() * 8) + 2;
+                puluhBottom = Math.floor(Math.random() * puluhTop);
+                saTop = Math.floor(Math.random() * 9) + 1;
+                saBottom = Math.floor(Math.random() * saTop);
+            } while (saTop < saBottom);
+        }
+
+        renderNumbers();
+
+        document.querySelectorAll(".dropzone").forEach(d => {
+            d.textContent = "_";
+            d.style.color = "#999";
+            d.style.borderColor = "#333";
+        });
     }
 
-    if (floatingText) {
-      floatingText.remove();
-      floatingText = null;
+    soalanBaru();
+
+    // =============================
+    // FLOAT BORROW LERP
+    // =============================
+    function rafLoop() {
+        currentPos.x += (targetPos.x - currentPos.x) * 0.22;
+        currentPos.y += (targetPos.y - currentPos.y) * 0.22;
+        if (floatBorrow) {
+            floatBorrow.style.left = currentPos.x + "px";
+            floatBorrow.style.top = currentPos.y + "px";
+        }
+        rafId = requestAnimationFrame(rafLoop);
     }
 
-    pinjamTouchStart = null;
-  });
+    function startFloatBorrow(x, y) {
+        if (floatBorrow) floatBorrow.remove();
 
-  // --- Drag Jawapan (Touch + Floating Preview) ---
-  const draggables = document.querySelectorAll(".num");
-  let activeFloat = null;
+        floatBorrow = document.createElement("div");
+        floatBorrow.className = "floating10";
+        floatBorrow.textContent = "10+";
+        floatBorrow.style.pointerEvents = "none";
+        floatBorrow.style.position = "absolute";
+        floatBorrow.style.zIndex = "99999";
+        floatBorrow.style.left = x + "px";
+        floatBorrow.style.top = y + "px";
 
-  draggables.forEach(num => {
-    num.addEventListener("touchstart", e => {
-      e.preventDefault();
-      num.classList.add("dragging");
+        document.body.appendChild(floatBorrow);
 
-      if (activeFloat) activeFloat.remove();
-      activeFloat = document.createElement("div");
-      activeFloat.className = "floating10";
-      activeFloat.textContent = num.textContent;
-      document.body.appendChild(activeFloat);
+        currentPos = { x, y };
+        targetPos = { x, y };
 
-      const touch = e.touches[0];
-      activeFloat.style.left = touch.pageX + 60 + "px";
-      activeFloat.style.top = touch.pageY - 80 + "px";
-      activeFloat.style.zIndex = "9999";
-    });
+        setTimeout(() => floatBorrow.classList.add("active"), 5);
 
-    num.addEventListener("touchmove", e => {
-      e.preventDefault();
+        if (!rafId) rafLoop();
+    }
 
-      const touch = e.touches[0];
-      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dropzone = elem?.closest(".dropzone");
+    function updateFloatPreview(sa) {
+        if (!floatBorrow) return;
+        floatBorrow.textContent = `10+${sa}`;
+    }
 
-      if (activeFloat) {
-        activeFloat.style.left = touch.pageX + 60 + "px";
-        activeFloat.style.top = touch.pageY - 80 + "px";
-      }
+    function updateFloatDefault() {
+        if (!floatBorrow) return;
+        floatBorrow.textContent = "10+";
+    }
 
-      document.querySelectorAll(".dropzone").forEach(z => {
-        z.style.borderColor = "#333";
-        z.style.opacity = "1";
-        z.classList.remove("previewing");
-        if (!z.textContent.trim()) z.textContent = "_";
-      });
+    function stopFloat() {
+        if (!floatBorrow) return;
 
-      if (dropzone) {
-        dropzone.style.borderColor = "#4CAF50";
-        dropzone.style.background = "#e6ffe6";
-        dropzone.textContent = num.textContent;
-        dropzone.style.opacity = "0.6";
-        dropzone.classList.add("previewing");
-      }
-    });
+        floatBorrow.classList.remove("active");
+        const f = floatBorrow;
+        floatBorrow = null;
 
-    num.addEventListener("touchend", e => {
-      const touch = e.changedTouches[0];
-      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dropzone = elem?.closest(".dropzone");
-
-      if (dropzone) {
-        dropzone.textContent = num.textContent;
-        dropzone.style.color = "#000";
-        dropzone.style.borderColor = "#4CAF50";
-        dropzone.style.background = "#fff";
-      }
-
-      if (activeFloat) {
-        activeFloat.style.transition = "opacity 0.3s ease";
-        activeFloat.style.opacity = "0";
         setTimeout(() => {
-          activeFloat.remove();
-          activeFloat = null;
-        }, 300);
-      }
+            try { f.remove(); } catch (e) {}
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }, 150);
+    }
 
-      document.querySelectorAll(".dropzone").forEach(z => {
-        z.style.borderColor = "#333";
-        z.style.opacity = "1";
-        z.classList.remove("previewing");
-        z.style.background = "#fafafa";
-      });
+    // =============================
+    // BORROW — MOUSE
+    // =============================
+    puluhBox.addEventListener("mousedown", e => {
 
-      num.classList.remove("dragging");
+        // PATCH: inhibit bila tak perlu pinjam
+        if (sudahPinjam || !(saTop < saBottom)) return;
+
+        previewPuluhDeducted = true;
+        puluhBox.classList.add("red");
+        renderNumbers();
+
+        startFloatBorrow(e.pageX, e.pageY - 20);
+
+        function onMove(ev) {
+            targetPos.x = ev.pageX;
+            targetPos.y = ev.pageY - 20;
+
+            const hit = elementFromPointSafe(ev.clientX, ev.clientY);
+            const overSa =
+                hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+
+            if (overSa) {
+                saBox.classList.add("preview");
+                saBox.textContent = saTop + 10;
+                updateFloatPreview(saTop);
+            } else {
+                saBox.classList.remove("preview");
+                saBox.textContent = saTop;
+                updateFloatDefault();
+            }
+        }
+
+        function onUp(ev) {
+            const hit = elementFromPointSafe(ev.clientX, ev.clientY);
+            const overSa =
+                hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+
+            if (overSa) {
+                puluhTop -= 1;
+                saTop += 10;
+                sudahPinjam = true;
+
+                puluhBox.classList.add("red");
+                saBox.classList.add("green");
+                saBox.classList.remove("preview");
+                saBox.textContent = saTop;
+
+            } else {
+                previewPuluhDeducted = false;
+                puluhBox.classList.remove("red");
+                saBox.classList.remove("preview");
+                renderNumbers();
+            }
+
+            stopFloat();
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+        }
+
+        window.addEventListener("mousemove", onMove);
+        window.addEventListener("mouseup", onUp);
     });
-  });
+
+    // =============================
+    // BORROW — TOUCH (PHONE SAFE)
+    // =============================
+    puluhBox.addEventListener("touchstart", e => {
+
+        if (sudahPinjam || !(saTop < saBottom)) return;
+
+        isTouchBorrow = true;
+
+        previewPuluhDeducted = true;
+        puluhBox.classList.add("red");
+        renderNumbers();
+
+        const t = e.touches[0];
+        startFloatBorrow(t.pageX, t.pageY - 20);
+
+    }, { passive:false });
+
+    puluhBox.addEventListener("touchmove", e => {
+
+        if (!isTouchBorrow) return;
+        e.preventDefault(); // safe: only during borrow drag
+
+        const t = e.touches[0];
+        targetPos.x = t.pageX;
+        targetPos.y = t.pageY - 20;
+
+        const hit = elementFromPointSafe(t.clientX, t.clientY);
+        const overSa =
+            hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+
+        if (overSa) {
+            saBox.classList.add("preview");
+            saBox.textContent = saTop + 10;
+            updateFloatPreview(saTop);
+        } else {
+            saBox.classList.remove("preview");
+            saBox.textContent = saTop;
+            updateFloatDefault();
+        }
+
+    }, { passive:false });
+
+    puluhBox.addEventListener("touchend", e => {
+
+        if (!isTouchBorrow) return;
+        isTouchBorrow = false;
+
+        const t = e.changedTouches[0];
+        const hit = elementFromPointSafe(t.clientX, t.clientY);
+        const overSa =
+            hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+
+        if (overSa) {
+            puluhTop -= 1;
+            saTop += 10;
+            sudahPinjam = true;
+
+            puluhBox.classList.add("red");
+            saBox.classList.add("green");
+            saBox.textContent = saTop;
+
+        } else {
+            previewPuluhDeducted = false;
+            puluhBox.classList.remove("red");
+            saBox.classList.remove("preview");
+            renderNumbers();
+        }
+
+        stopFloat();
+
+    });
+
+    // =============================
+    // NUMBER PAD — DESKTOP DRAG
+    // =============================
+    function placeNumber(dz, num) {
+        dz.textContent = num;
+        dz.style.color = "#000";
+        dz.style.borderColor = "#4CAF50";
+    }
+
+    document.querySelectorAll(".num").forEach(n => {
+        n.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("text/plain", n.textContent);
+        });
+    });
+
+    document.querySelectorAll(".dropzone").forEach(dz => {
+        dz.addEventListener("dragover", e => e.preventDefault());
+        dz.addEventListener("drop", e => {
+            e.preventDefault();
+            const num = e.dataTransfer.getData("text/plain");
+            placeNumber(dz, num);
+            if (quizMode) autoNext();
+        });
+    });
+
+    // =============================
+    // NUMBER PAD — TOUCH (PHONE SAFE)
+    // =============================
+    document.querySelectorAll(".num").forEach(n => {
+
+        n.addEventListener("touchstart", ev => {
+            ev.preventDefault();
+
+            const num = n.textContent;
+            const t = ev.touches[0];
+
+            const float = document.createElement("div");
+            float.className = "floating10";
+            float.textContent = num;
+            float.style.position = "absolute";
+            float.style.zIndex = "99999";
+            float.style.pointerEvents = "none";
+            float.style.left = t.pageX + "px";
+            float.style.top = (t.pageY - 40) + "px";
+            document.body.appendChild(float);
+
+            function moveHandler(me) {
+                const tt = me.touches[0];
+                float.style.left = tt.pageX + "px";
+                float.style.top = (tt.pageY - 40) + "px";
+            }
+
+            function endHandler(me) {
+                const tt = me.changedTouches[0];
+                const hit = elementFromPointSafe(tt.clientX, tt.clientY);
+                const dz = hit && hit.closest?.(".dropzone");
+
+                if (dz) placeNumber(dz, num);
+
+                float.remove();
+
+                if (quizMode) autoNext();
+
+                window.removeEventListener("touchmove", moveHandler);
+                window.removeEventListener("touchend", endHandler);
+            }
+
+            window.addEventListener("touchmove", moveHandler, { passive:false });
+            window.addEventListener("touchend", endHandler, { passive:true });
+
+        }, { passive:false });
+
+    });
+
+    // =============================
+    // AUTO NEXT
+    // =============================
+    function autoNext() {
+        if (!quizMode) return;
+
+        const p = document.getElementById("ansPuluh").textContent.trim();
+        const s = document.getElementById("ansSa").textContent.trim();
+
+        if (/^[0-9]$/.test(p) && /^[0-9]$/.test(s)) {
+            setTimeout(() => cekJawapan(), 150);
+        }
+    }
+
+    // =============================
+    // CEK JAWAPAN
+    // =============================
+    window.cekJawapan = function() {
+
+        const ansP = document.getElementById("ansPuluh").textContent.trim();
+        const ansS = document.getElementById("ansSa").textContent.trim();
+
+        let saRes = saTop - saBottom;
+        let pulRes = puluhTop - puluhBottom;
+
+        if (!sudahPinjam && saTop < saBottom) {
+            saRes = saTop + 10 - saBottom;
+            pulRes = puluhTop - 1 - puluhBottom;
+        }
+
+        const betul = ansP == pulRes && ansS == saRes;
+
+        if (quizMode) {
+            if (betul) score++;
+            setTimeout(() => soalanBaru(), 180);
+            return;
+        }
+
+        feedback.style.display = "block";
+        if (betul) {
+            feedback.textContent = "Betul!";
+            feedback.style.color = "green";
+        } else {
+            feedback.textContent =
+                `Salah! Jawapan sebenar: ${pulRes}${saRes}`;
+            feedback.style.color = "red";
+        }
+    };
+
+    window.soalanBaru = soalanBaru;
+
 });
