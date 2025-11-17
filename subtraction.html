@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- LOCAL FONT -->
+    <!-- LOCAL FONT + ORIGINAL CSS -->
     <link rel="stylesheet" href="fonts.css">
     <link rel="stylesheet" href="style.css">
 
@@ -17,6 +17,51 @@
         .dropzone {
             touch-action: none;
         }
+
+        /* FLOATING PREVIEW (from addition) */
+        .floating-preview {
+            position: absolute;
+            font-size: 45px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.9);
+            padding: 5px 12px;
+            border-radius: 8px;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            opacity: 1;
+            z-index: 99999;
+        }
+
+        /* floating 10+ borrow */
+        .floating10 {
+            position: absolute;
+            font-size: 40px;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.15s;
+            pointer-events: none;
+            z-index: 99999;
+        }
+
+        .floating10.active {
+            opacity: 1;
+        }
+
+        /* Number pad pop animation */
+        .num {
+            transition: transform 0.12s, opacity 0.12s;
+        }
+
+        .num:active {
+            transform: scale(1.15);
+        }
+
+        /* highlight effect for dropzone */
+        .dropzone.highlight {
+            background: #ffedc2;
+            border-color: #ff9900 !important;
+        }
+
     </style>
 </head>
 

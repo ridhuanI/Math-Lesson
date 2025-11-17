@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentPos = { x: 0, y: 0 };
     let isTouchBorrow = false;
 
-    // QUIZ VARS
     let quizMode = false;
     let score = 0;
     let totalSoalan = 5;
@@ -43,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hud = document.getElementById("hud");
     const feedback = document.getElementById("feedback");
 
-    // Disable draggable on touch devices
+    // Disable draggable on touch
     if ("ontouchstart" in window) {
         document.querySelectorAll(".num, #puluhTop").forEach(el =>
             el.removeAttribute("draggable")
@@ -96,10 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
         sudahPinjam = false;
         previewPuluhDeducted = false;
 
-        // RESET COLOR STATE (patch)
+        // Reset colors
         puluhBox.classList.remove("red");
-        saBox.classList.remove("green");
-        saBox.classList.remove("preview");
+        saBox.classList.remove("green", "preview");
         puluhBox.style.color = "";
         saBox.style.color = "";
 
@@ -114,11 +112,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             setHUD(`Soalan ${currentSoalan} / ${totalSoalan}`);
-        } else {
-            setHUD("");
-        }
+        } else setHUD("");
 
-        const perluPinjam = Math.random() < 0.5;
+        let perluPinjam = Math.random() < 0.5;
 
         if (perluPinjam) {
             do {
@@ -166,9 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
         floatBorrow = document.createElement("div");
         floatBorrow.className = "floating10";
         floatBorrow.textContent = "10+";
-        floatBorrow.style.pointerEvents = "none";
         floatBorrow.style.position = "absolute";
         floatBorrow.style.zIndex = "99999";
+        floatBorrow.style.pointerEvents = "none";
+
         floatBorrow.style.left = x + "px";
         floatBorrow.style.top = y + "px";
 
@@ -183,13 +180,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateFloatPreview(sa) {
-        if (!floatBorrow) return;
-        floatBorrow.textContent = `10+${sa}`;
+        if (floatBorrow) floatBorrow.textContent = "10+" + sa;
     }
-
     function updateFloatDefault() {
-        if (!floatBorrow) return;
-        floatBorrow.textContent = "10+";
+        if (floatBorrow) floatBorrow.textContent = "10+";
     }
 
     function stopFloat() {
@@ -203,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try { f.remove(); } catch (e) {}
             cancelAnimationFrame(rafId);
             rafId = null;
-        }, 150);
+        }, 120);
     }
 
     // =============================
@@ -211,24 +205,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // =============================
     puluhBox.addEventListener("mousedown", e => {
 
-        // PATCH: inhibit bila tak perlu pinjam
         if (sudahPinjam || !(saTop < saBottom)) return;
 
         previewPuluhDeducted = true;
         puluhBox.classList.add("red");
         renderNumbers();
 
-        startFloatBorrow(e.pageX, e.pageY - 20);
+        startFloatBorrow(e.pageX, e.pageY - 25);
 
         function onMove(ev) {
             targetPos.x = ev.pageX;
-            targetPos.y = ev.pageY - 20;
+            targetPos.y = ev.pageY - 25;
 
             const hit = elementFromPointSafe(ev.clientX, ev.clientY);
-            const overSa =
-                hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+            const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
 
-            if (overSa) {
+            if (hoverSa) {
                 saBox.classList.add("preview");
                 saBox.textContent = saTop + 10;
                 updateFloatPreview(saTop);
@@ -241,17 +233,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function onUp(ev) {
             const hit = elementFromPointSafe(ev.clientX, ev.clientY);
-            const overSa =
-                hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+            const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
 
-            if (overSa) {
+            if (hoverSa) {
                 puluhTop -= 1;
                 saTop += 10;
                 sudahPinjam = true;
 
                 puluhBox.classList.add("red");
                 saBox.classList.add("green");
-                saBox.classList.remove("preview");
                 saBox.textContent = saTop;
 
             } else {
@@ -271,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =============================
-    // BORROW — TOUCH (PHONE SAFE)
+    // BORROW — TOUCH
     // =============================
     puluhBox.addEventListener("touchstart", e => {
 
@@ -283,25 +273,24 @@ document.addEventListener("DOMContentLoaded", () => {
         puluhBox.classList.add("red");
         renderNumbers();
 
-        const t = e.touches[0];
-        startFloatBorrow(t.pageX, t.pageY - 20);
+        let t = e.touches[0];
+        startFloatBorrow(t.pageX, t.pageY - 30);
 
     }, { passive:false });
 
     puluhBox.addEventListener("touchmove", e => {
 
         if (!isTouchBorrow) return;
-        e.preventDefault(); // safe: only during borrow drag
+        e.preventDefault();
 
-        const t = e.touches[0];
+        let t = e.touches[0];
         targetPos.x = t.pageX;
-        targetPos.y = t.pageY - 20;
+        targetPos.y = t.pageY - 30;
 
         const hit = elementFromPointSafe(t.clientX, t.clientY);
-        const overSa =
-            hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+        const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
 
-        if (overSa) {
+        if (hoverSa) {
             saBox.classList.add("preview");
             saBox.textContent = saTop + 10;
             updateFloatPreview(saTop);
@@ -318,12 +307,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isTouchBorrow) return;
         isTouchBorrow = false;
 
-        const t = e.changedTouches[0];
+        let t = e.changedTouches[0];
         const hit = elementFromPointSafe(t.clientX, t.clientY);
-        const overSa =
-            hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
+        const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
 
-        if (overSa) {
+        if (hoverSa) {
             puluhTop -= 1;
             saTop += 10;
             sudahPinjam = true;
@@ -343,68 +331,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
-    // =============================
-    // NUMBER PAD — DESKTOP DRAG
-    // =============================
-    function placeNumber(dz, num) {
-        dz.textContent = num;
-        dz.style.color = "#000";
-        dz.style.borderColor = "#4CAF50";
-    }
+    // ============================================
+    // NUMBER PAD — ADDITION-STYLE ANIMATION MERGE
+    // ============================================
+    const nums = document.querySelectorAll(".num");
+    const dropzones = document.querySelectorAll(".dropzone");
 
-    document.querySelectorAll(".num").forEach(n => {
-        n.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("text/plain", n.textContent);
-        });
-    });
+    nums.forEach(num => {
 
-    document.querySelectorAll(".dropzone").forEach(dz => {
-        dz.addEventListener("dragover", e => e.preventDefault());
-        dz.addEventListener("drop", e => {
+        // TOUCH START (floating preview + opacity feedback)
+        num.addEventListener("touchstart", e => {
+
             e.preventDefault();
-            const num = e.dataTransfer.getData("text/plain");
-            placeNumber(dz, num);
-            if (quizMode) autoNext();
-        });
-    });
 
-    // =============================
-    // NUMBER PAD — TOUCH (PHONE SAFE)
-    // =============================
-    document.querySelectorAll(".num").forEach(n => {
+            const digit = num.textContent;
+            const touch = e.touches[0];
 
-        n.addEventListener("touchstart", ev => {
-            ev.preventDefault();
-
-            const num = n.textContent;
-            const t = ev.touches[0];
-
+            // Floating preview
             const float = document.createElement("div");
-            float.className = "floating10";
-            float.textContent = num;
+            float.className = "floating-preview";
+            float.textContent = digit;
             float.style.position = "absolute";
             float.style.zIndex = "99999";
             float.style.pointerEvents = "none";
-            float.style.left = t.pageX + "px";
-            float.style.top = (t.pageY - 40) + "px";
+            float.style.left = touch.pageX + "px";
+            float.style.top = (touch.pageY - 40) + "px";
+
             document.body.appendChild(float);
 
-            function moveHandler(me) {
-                const tt = me.touches[0];
-                float.style.left = tt.pageX + "px";
-                float.style.top = (tt.pageY - 40) + "px";
+            num.style.opacity = "0.4";
+
+            function moveHandler(ev) {
+                const t = ev.touches[0];
+                float.style.left = t.pageX + "px";
+                float.style.top = (t.pageY - 40) + "px";
+
+                dropzones.forEach(dz => {
+                    const rect = dz.getBoundingClientRect();
+                    const inside =
+                        t.clientX >= rect.left &&
+                        t.clientX <= rect.right &&
+                        t.clientY >= rect.top &&
+                        t.clientY <= rect.bottom;
+
+                    dz.style.background = inside ? "#ffedc2" : "";
+                    dz.style.borderColor = inside ? "#ff9900" : "#333";
+                });
             }
 
-            function endHandler(me) {
-                const tt = me.changedTouches[0];
-                const hit = elementFromPointSafe(tt.clientX, tt.clientY);
+            function endHandler(ev) {
+                const t = ev.changedTouches[0];
+                const hit = elementFromPointSafe(t.clientX, t.clientY);
                 const dz = hit && hit.closest?.(".dropzone");
 
-                if (dz) placeNumber(dz, num);
+                if (dz) {
+                    dz.textContent = digit;
+                    dz.style.color = "#000";
+                    dz.style.borderColor = "#4CAF50";
+                    if (quizMode) autoNext();
+                }
 
                 float.remove();
+                num.style.opacity = "1";
 
-                if (quizMode) autoNext();
+                dropzones.forEach(dz => {
+                    dz.style.background = "";
+                    dz.style.borderColor = "#333";
+                });
 
                 window.removeEventListener("touchmove", moveHandler);
                 window.removeEventListener("touchend", endHandler);
@@ -414,6 +407,20 @@ document.addEventListener("DOMContentLoaded", () => {
             window.addEventListener("touchend", endHandler, { passive:true });
 
         }, { passive:false });
+
+        // PC click pop animation (same as addition)
+        num.addEventListener("mousedown", () => {
+            num.style.transform = "scale(1.15)";
+            num.style.transition = "transform 0.12s";
+        });
+
+        num.addEventListener("mouseup", () => {
+            num.style.transform = "scale(1)";
+        });
+
+        num.addEventListener("mouseleave", () => {
+            num.style.transform = "scale(1)";
+        });
 
     });
 
@@ -447,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
             pulRes = puluhTop - 1 - puluhBottom;
         }
 
-        const betul = ansP == pulRes && ansS == saRes;
+        const betul = (ansP == pulRes && ansS == saRes);
 
         if (quizMode) {
             if (betul) score++;
@@ -456,16 +463,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         feedback.style.display = "block";
-        if (betul) {
-            feedback.textContent = "Betul!";
-            feedback.style.color = "green";
-        } else {
-            feedback.textContent =
-                `Salah! Jawapan sebenar: ${pulRes}${saRes}`;
-            feedback.style.color = "red";
-        }
+        feedback.style.color = betul ? "green" : "red";
+        feedback.textContent = betul ?
+            "Betul!" :
+            `Salah! Jawapan sebenar: ${pulRes}${saRes}`;
     };
 
     window.soalanBaru = soalanBaru;
-
 });
