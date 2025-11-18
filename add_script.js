@@ -345,45 +345,46 @@ nums.forEach(num => {
         }
 
         function endHandler(ev) {
-            const t = ev.changedTouches[0];
-            const hit = document.elementFromPoint(t.clientX, t.clientY);
-            const dz = hit && hit.closest?.(".dropzone");
+    	const t = ev.changedTouches[0];
+    	const hit = document.elementFromPoint(t.clientX, t.clientY);
+    	const dz = hit && hit.closest?.(".dropzone");
 
-            if (dz) {
-                dz.textContent = digit;
-                dz.style.color = "#000";
-                dz.style.borderColor = "#4CAF50";
+    	if (dz) {
+            dz.textContent = digit;
+            dz.style.color = "#000";
+            dz.style.borderColor = "#4CAF50";
 
-		// CARRY LOGIC (ADD ONLY)
-        	if (dz.id === "ansSa") {
-            	    const jumlahSa = saTop + saBottom;
-            	    if (jumlahSa >= 10 && !sudahBawa) {
-                	sudahBawa = true;
-                	tunjukCarry();
-            	    }
-        	}
-
-                if (quizMode) autoNext();
+            // CARRY LOGIC (ADD ONLY)
+            if (dz.id === "ansSa") {
+                const jumlahSa = saTop + saBottom;
+                if (jumlahSa >= 10 && !sudahBawa) {
+                    sudahBawa = true;
+                    tunjukCarry();
+                }
             }
 
-            float.remove();
-            num.style.opacity = "1";
-
-            drops.forEach(dz => {
-                dz.style.background = "";
-                dz.style.borderColor = "#333";
-            });
-
-            window.removeEventListener("touchmove", moveHandler);
-            window.removeEventListener("touchend", endHandler);
+            if (quizMode) autoNext();
         }
 
-        window.addEventListener("touchmove", moveHandler, { passive:false });
-        window.addEventListener("touchend", endHandler, { passive:true });
+        float.remove();
+        num.style.opacity = "1";
+
+        drops.forEach(dz => {
+            dz.style.background = "";
+            dz.style.borderColor = "#333";
+        });
+
+        window.removeEventListener("touchmove", moveHandler);
+        window.removeEventListener("touchend", endHandler);
+    }
+
+    window.addEventListener("touchmove", moveHandler, { passive:false });
+    window.addEventListener("touchend", endHandler, { passive:true });
 
     }, { passive:false });
 
 });
+
 
 
     window.addEventListener("resize", alignCarryBox);
