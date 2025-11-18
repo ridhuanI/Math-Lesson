@@ -5,82 +5,111 @@
     <title>Keputusan Quiz</title>
     <link rel="stylesheet" href="style.css">
 
-    <style>
-        body {
-            padding-top: 60px;
-            text-align: center;
-            background: #fffaf0;
-        }
+<style>
 
-        h1 {
-            color: #ff6600;
-            margin-bottom: 30px;
-        }
+<style>
+    body {
+        padding-top: 60px;
+        text-align: center;
+        background: #fffaf0;
+    }
 
-        .result-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-        }
+    h1 {
+        color: #ff6600;
+        margin-bottom: 30px;
+    }
 
+    .result-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        padding: 0 16px;    /* supaya phone tak rapat tepi */
+    }
+
+    /* ==== RESPONSIVE RESULT CARD ==== */
+    .result-card {
+        background: #ffffff;
+        padding: 30px 40px;
+        border-radius: 18px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 22px;
+        color: #333;
+
+        /* PATCH: jadikan responsive */
+        width: 100%;
+        max-width: 420px;     /* phone/tablet/desktop fit cantik */
+        min-width: unset;     /* buang fixed width kecil */
+    }
+
+    .result-card p {
+        margin: 10px 0;
+    }
+
+    .label-bintang {
+        font-size: 20px;
+        margin-top: 15px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .stars {
+        font-size: 45px;
+        margin-top: 5px;
+    }
+
+    .star-active {
+        color: #ffcc00;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+    }
+
+    .star-inactive {
+        color: #ddd;
+    }
+
+    .feedback-text {
+        margin-top: 15px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #ff6600;
+    }
+
+    a.back-link {
+        font-size: 20px;
+        color: #444;
+        text-decoration: none;
+        padding: 8px 0;
+        display: inline-block;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+    }
+
+    a.back-link:hover {
+        opacity: 0.7;
+    }
+
+    /* ==== PHONE RESPONSIVE ==== */
+    @media (max-width: 430px) {
         .result-card {
-            background: #ffffff;
-            padding: 30px 40px;
-            border-radius: 18px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 22px;
-            color: #333;
-            min-width: 260px;
-        }
-
-        .result-card p {
-            margin: 10px 0;
-        }
-
-        .label-bintang {
-            font-size: 20px;
-            margin-top: 15px;
-            color: #333;
-            font-weight: 600;
+            padding: 24px 18px;  /* padding kecil sikit utk phone */
+            font-size: 20px;     /* kecil sikit supaya muat */
         }
 
         .stars {
-            font-size: 45px;
-            margin-top: 5px;
-        }
-
-        .star-active {
-            color: #ffcc00;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.25);
-        }
-
-        .star-inactive {
-            color: #ddd;
+            font-size: 40px;
         }
 
         .feedback-text {
-            margin-top: 15px;
-            font-size: 22px;
-            font-weight: 700;
-            color: #ff6600;
-        }
-
-        /* Back link – simple, not button */
-        a.back-link {
             font-size: 20px;
-            color: #444;
-            text-decoration: none;
-            padding: 8px 0;
-            display: inline-block;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
         }
 
-        a.back-link:hover {
-            opacity: 0.7;
+        a.back-link {
+            font-size: 18px;
         }
-    </style>
+    }
+</style>
+
+</style>
 </head>
 
 <body>
