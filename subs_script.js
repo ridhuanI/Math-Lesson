@@ -42,12 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hud = document.getElementById("hud");
     const feedback = document.getElementById("feedback");
 
-    // Disable draggable on touch
-    if ("ontouchstart" in window) {
-        document.querySelectorAll(".num, #puluhTop").forEach(el =>
-            el.removeAttribute("draggable")
-        );
-    }
+    
 
     // =============================
     // SAFE ELEMENT-FROM-POINT
@@ -423,6 +418,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     });
+
+// =============================================
+// DESKTOP DRAG & DROP (MOUSE MODE)
+// =============================================
+const numsDesktop = document.querySelectorAll(".num");
+const dropzonesDesktop = document.querySelectorAll(".dropzone");
+
+// DRAGSTART
+numsDesktop.forEach(num => {
+    num.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", num.textContent);
+        num.classList.add("dragging");
+    });
+
+    num.addEventListener("dragend", () => {
+        num.classList.remove("dragging");
+    });
+});
+
+// DRAGOVER → wajib untuk benarkan drop
+dropzonesDesktop.forEach(zone => {
+    zone.addEventListener("dragover", e => {
+        e.preventDefault();
+        zone.style.borderColor = "#4CAF50";
+        zone.style.background = "#e6ffe6";
+    });
+
+    zone.addEventListener("dragleave", () => {
+        zone.style.borderColor = "#333";
+        zone.style.background = "";
+    });
+
+    // DROP
+    zone.addEventListener("drop", e => {
+        e.preventDefault();
+        const digit = e.dataTransfer.getData("text/plain");
+
+        zone.textContent = digit;
+        zone.style.color = "#000";
+        zone.style.borderColor = "#4CAF50";
+        zone.style.background = "";
+
+        // Auto next (quiz mode)
+        if (quizMode) {
+            const p = document.getElementById("ansPuluh").textContent.trim();
+            const s = document.getElementById("ansSa").textContent.trim();
+
+            if (/^[0-9]$/.test(p) && /^[0-9]$/.test(s)) {
+                setTimeout(() => cekJawapan(), 150);
+            }
+        }
+    });
+});
+
 
     // =============================
     // AUTO NEXT
