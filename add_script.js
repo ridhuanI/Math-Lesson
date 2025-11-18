@@ -297,93 +297,103 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-// =============================================
-// TOUCH DRAG — FLOATING PREVIEW (FROM SUBTRACTION)
-// =============================================
-nums.forEach(num => {
+    // =====================================================
+    // TOUCH MODE (FULLY FIXED)
+    // =====================================================
+    nums.forEach(num => {
 
-    num.addEventListener("touchstart", e => {
+        num.addEventListener("touchstart", e => {
+            e.preventDefault();
 
-        e.preventDefault();
+            const digit = num.textContent;
+            const touch = e.touches[0];
 
-        const digit = num.textContent;
-        const touch = e.touches[0];
+            // Floating preview
+            const float = document.createElement("div");
+            float.className = "floating-preview";
+            float.textContent = digit;
+            float.style.position = "absolute";
+            float.style.zIndex = "99999";
+            float.style.pointerEvents = "none";
+            float.style.left = touch.pageX + "px";
+            float.style.top  = (touch.pageY - 40) + "px";
+            document.body.appendChild(float);
 
-        // Floating preview (clean version)
-        const float = document.createElement("div");
-        float.className = "floating-preview";
-        float.textContent = digit;
-        float.style.position = "absolute";
-        float.style.zIndex = "99999";
-        float.style.pointerEvents = "none";
-        float.style.left = touch.pageX + "px";
-        float.style.top = (touch.pageY - 40) + "px";
+            num.style.opacity = "0.4";
 
-        document.body.appendChild(float);
+            // TOUCH MOVE HANDLER
+            function moveHandler(ev) {
+                const t = ev.touches[0];
+                float.style.left = t.pageX + "px";
+                float.style.top  = (t.pageY - 40) + "px";
 
-        num.style.opacity = "0.4";
+                drops.forEach(dz => {
+                    const rect = dz.getBoundingClientRect();
+                    const inside =
+                        t.clientX >= rect.left &&
+                        t.clientX <= rect.right &&
+                        t.clientY >= rect.top &&
+                        t.clientY <= rect.bottom;
 
-        function moveHandler(ev) {
-            const t = ev.touches[0];
+                    dz.style.background  = inside ? "#ffedc2" : "";
+                    dz.style.borderColor = inside ? "#ff9900" : "#333";
+                });
+            }
 
-            // Follow finger
-            float.style.left = t.pageX + "px";
-            float.style.top = (t.pageY - 40) + "px";
+            // TOUCH END HANDLER
+            function endHandler(ev) {
+                const t = ev.changedTouches[0];
+                const hit = document.elementFromPoint(t.clientX, t.clientY);
+                const dz = hit && hit.closest?.(".dropzone");
 
-            // Highlight dropzones
-            drops.forEach(dz => {
-                const rect = dz.getBoundingClientRect();
-                const inside =
-                    t.clientX >= rect.left &&
-                    t.clientX <= rect.right &&
-                    t.clientY >= rect.top &&
-                    t.clientY <= rect.bottom;
+                if (dz) {
+                    dz.textContent = digit;
+                    dz.style.color = "#000";
+                    dz.style.borderColor = "#4CAF50";
 
-                dz.style.background = inside ? "#ffedc2" : "";
-                dz.style.borderColor = inside ? "#ff9900" : "#333";
-            });
-        }
+                    // CARRY LOGIC
+                    if (dz.id === "ansSa") {
+                        const jumlahSa = saTop + saBottom;
+                        if (jumlahSa >= 10 && !sudahBawa) {
+                            sudahBawa = true;
+                            tunjukCarry();
+                        }
+                    }
+                }
 
-        function endHandler(ev) {
-    	const t = ev.changedTouches[0];
-    	const hit = document.elementFromPoint(t.clientX, t.clientY);
-    	const dz = hit && hit.closest?.(".dropzone");
+                // CLEANUP
+                float.remove();
+                num.style.opacity = "1";
 
-    	if (dz) {
-            dz.textContent = digit;
-            dz.style.color = "#000";
-            dz.style.borderColor = "#4CAF50";
+                drops.forEach(z => {
+                    z.style.background = "";
+                    z.style.borderColor = "#333";
+                });
 
-            // CARRY LOGIC (ADD ONLY)
-            if (dz.id === "ansSa") {
-                const jumlahSa = saTop + saBottom;
-                if (jumlahSa >= 10 && !sudahBawa) {
-                    sudahBawa = true;
-                    tunjukCarry();
+                window.removeEventListener("touchmove", moveHandler);
+                window.removeEventListener("touchend", endHandler);
+
+                // QUIZ AUTO-NEXT (AFTER CLEANUP)
+                if (quizMode) {
+                    const puluhFilled = ansPuluh.textContent !== "_";
+                    const saFilled    = ansSa.textContent !== "_";
+
+                    if (puluhFilled && saFilled) {
+                        setTimeout(() => cekJawapan(), 50);
+                    }
                 }
             }
 
-            if (quizMode) autoNext();
-        }
+            window.addEventListener("touchmove", moveHandler, { passive:false });
+            window.addEventListener("touchend", endHandler, { passive:true });
 
-        float.remove();
-        num.style.opacity = "1";
+        }, { passive:false });
 
-        drops.forEach(dz => {
-            dz.style.background = "";
-            dz.style.borderColor = "#333";
-        });
+    });
 
-        window.removeEventListener("touchmove", moveHandler);
-        window.removeEventListener("touchend", endHandler);
-    }
-
-    window.addEventListener("touchmove", moveHandler, { passive:false });
-    window.addEventListener("touchend", endHandler, { passive:true });
-
-    }, { passive:false });
 
 });
+
 
 
 
