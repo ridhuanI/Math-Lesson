@@ -354,6 +354,15 @@ nums.forEach(num => {
                 dz.style.color = "#000";
                 dz.style.borderColor = "#4CAF50";
 
+		// CARRY LOGIC (ADD ONLY)
+        	if (dz.id === "ansSa") {
+            	    const jumlahSa = saTop + saBottom;
+            	    if (jumlahSa >= 10 && !sudahBawa) {
+                	sudahBawa = true;
+                	tunjukCarry();
+            	    }
+        	}
+
                 if (quizMode) autoNext();
             }
 
