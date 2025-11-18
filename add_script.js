@@ -296,67 +296,65 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(animate);
     }
 
-// =====================================================
+    // =====================================================
     // TOUCH SUPPORT (iPad / iPhone / Android)
     // Floating number preview (exact like subtraction)
     // =====================================================
-    let previewFloat = null;
+    const dropzones = document.querySelectorAll(".dropzone");
 
     nums.forEach(num => {
 
-        // TOUCH START
-        num.addEventListener("touchstart", e => {
-            e.preventDefault();
+    num.addEventListener("touchstart", e => {
+        e.preventDefault();
 
-            if (previewFloat) previewFloat.remove();
+        const digit = num.textContent;
+        const touch = e.touches[0];
 
-            previewFloat = document.createElement("div");
-            previewFloat.className = "floating-preview";
-            previewFloat.textContent = num.textContent;
-            document.body.appendChild(previewFloat);
+        // Floating preview
+        const float = document.createElement("div");
+        float.className = "floating-preview";
+        float.textContent = digit;
+        float.style.position = "absolute";
+        float.style.zIndex = "99999";
+        float.style.pointerEvents = "none";
+        float.style.left = touch.pageX + "px";
+        float.style.top  = (touch.pageY - 40) + "px";
 
-            const touch = e.touches[0];
-            previewFloat.style.left = touch.pageX + "px";
-            previewFloat.style.top  = touch.pageY + "px";
+        document.body.appendChild(float);
+        num.style.opacity = "0.4";
 
-            num.style.opacity = "0.3";
-        });
+        // MOVE HANDLER
+        function moveHandler(ev) {
+            const t = ev.touches[0];
+            float.style.left = t.pageX + "px";
+            float.style.top  = (t.pageY - 40) + "px";
 
-        // TOUCH MOVE
-        num.addEventListener("touchmove", e => {
-            e.preventDefault();
-            if (!previewFloat) return;
+            dropzones.forEach(dz => {
+                const rect = dz.getBoundingClientRect();
+                const inside =
+                    t.clientX >= rect.left &&
+                    t.clientX <= rect.right &&
+                    t.clientY >= rect.top &&
+                    t.clientY <= rect.bottom;
 
-            const touch = e.touches[0];
-            previewFloat.style.left = touch.pageX + "px";
-            previewFloat.style.top  = touch.pageY + "px";
-
-            let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-            const dropzone = elem?.closest(".dropzone");
-
-            document.querySelectorAll(".dropzone").forEach(z => {
-                z.style.borderColor = "#333";
-                z.style.opacity = "1";
+                dz.style.background  = inside ? "#ffedc2" : "";
+                dz.style.borderColor = inside ? "#ff9900" : "#333";
             });
+        }
 
-            if (dropzone) {
-                dropzone.style.borderColor = "#4CAF50";
-                dropzone.style.opacity = "0.6";
-            }
-        });
+        // END HANDLER
+        function endHandler(ev) {
+            const t = ev.changedTouches[0];
+            const hit = document.elementFromPoint(t.clientX, t.clientY);
+            const dz = hit && hit.closest?.(".dropzone");
 
-        // TOUCH END
-        num.addEventListener("touchend", e => {
-            const touch = e.changedTouches[0];
-            let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-            const dropzone = elem?.closest(".dropzone");
+            if (dz) {
+                dz.textContent = digit;
+                dz.style.color = "#000";
+                dz.style.borderColor = "#4CAF50";
 
-            if (dropzone) {
-                dropzone.textContent = num.textContent;
-                dropzone.style.color = "#000";
-                dropzone.style.borderColor = "#4CAF50";
-
-                if (dropzone.id === "ansSa") {
+                // CARRY FOR ADDITION
+                if (dz.id === "ansSa") {
                     const jumlahSa = saTop + saBottom;
                     if (jumlahSa >= 10 && !sudahBawa) {
                         sudahBawa = true;
@@ -365,30 +363,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            if (previewFloat) {
-                previewFloat.remove();
-                previewFloat = null;
-            }
-
+            float.remove();
             num.style.opacity = "1";
 
-            document.querySelectorAll(".dropzone").forEach(z => {
-                z.style.opacity    = "1";
+            dropzones.forEach(z => {
+                z.style.background = "";
                 z.style.borderColor = "#333";
             });
 
-            // touch: after placing a digit, auto-check for quiz
+            window.removeEventListener("touchmove", moveHandler);
+            window.removeEventListener("touchend", endHandler);
+
+            // quiz auto-next AFTER cleanup
             if (quizMode) {
-                const puluhFilled = document.getElementById("ansPuluh").textContent.trim() !== "_";
-                const saFilled    = document.getElementById("ansSa").textContent.trim() !== "_";
+                const puluhFilled = ansPuluh.textContent !== "_";
+                const saFilled    = ansSa.textContent !== "_";
 
                 if (puluhFilled && saFilled) {
-                    cekJawapan();
+                    setTimeout(() => cekJawapan(), 40);
                 }
             }
-        });
+        }
 
-    });
+        window.addEventListener("touchmove", moveHandler, { passive:false });
+        window.addEventListener("touchend", endHandler, { passive:true });
+
+    }, { passive:false });
+
+});
 
     window.addEventListener("resize", alignCarryBox);
 
