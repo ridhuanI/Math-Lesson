@@ -1,536 +1,127 @@
-document.addEventListener("DOMContentLoaded", () => {
+(function () {
+  'use strict';
 
-    // =============================
-    // VARIABLES
-    // =============================
-    let puluhTop, saTop, puluhBottom, saBottom;
-    let sudahPinjam = false;
-    let previewPuluhDeducted = false;
+  var params    = new URLSearchParams(window.location.search);
+  var quizMode  = params.get('quiz') === '1';
+  var totalQ    = Number(params.get('q')) || 5;
+  var qNum      = 1;
+  var score     = 0;
+  var answered  = false;
 
-    let floatBorrow = null;
-    let rafId = null;
-    let targetPos = { x: 0, y: 0 };
-    let currentPos = { x: 0, y: 0 };
-    let isTouchBorrow = false;
+  var hudEl      = document.getElementById('hud');
+  var starsA     = document.getElementById('starsA');
+  var starsB     = document.getElementById('starsB');
+  var equationEl = document.getElementById('equation');
+  var choiceGrid = document.getElementById('choiceGrid');
+  var feedbackEl = document.getElementById('feedback');
+  var btnNext    = document.getElementById('btnNext');
 
-    let quizMode = false;
-    let score = 0;
-    let totalSoalan = 5;
-    let currentSoalan = 0;
+  function randInt(a, b) {
+    return Math.floor(Math.random() * (b - a + 1)) + a;
+  }
 
-    // =============================
-    // QUIZ PARAM CHECK
-    // =============================
-    const url = new URLSearchParams(window.location.search);
-    if (url.get("quiz") === "1") {
-        quizMode = true;
-        totalSoalan = Number(url.get("q")) || 5;
+  function updateHUD() {
+    hudEl.textContent = quizMode ? ('Soalan ' + qNum + ' / ' + totalQ) : '';
+  }
 
-        const b1 = document.getElementById("btnCek");
-        const b2 = document.getElementById("btnBaru");
-        if (b1) b1.style.display = "none";
-        if (b2) b2.style.display = "none";
+  function renderStars(container, n) {
+    container.innerHTML = '';
+    if (n > 9) return;
+    for (var i = 0; i < n; i++) {
+      var span = document.createElement('span');
+      span.className = 'math-star';
+      span.style.animationDelay = (i * 50) + 'ms';
+      span.textContent = '⭐';
+      container.appendChild(span);
+    }
+  }
+
+  function makeChoices(correct, min, max) {
+    var choices = [correct];
+    var attempts = 0;
+    while (choices.length < 4 && attempts < 40) {
+      var offset = randInt(1, 4) * (Math.random() < 0.5 ? 1 : -1);
+      var d = correct + offset;
+      if (d >= min && d <= max && choices.indexOf(d) === -1) choices.push(d);
+      attempts++;
+    }
+    for (var v = min; choices.length < 4 && v <= max; v++) {
+      if (choices.indexOf(v) === -1) choices.push(v);
+    }
+    return choices.sort(function () { return Math.random() - 0.5; });
+  }
+
+  function newQuestion() {
+    answered = false;
+    feedbackEl.style.display = 'none';
+    btnNext.style.display    = 'none';
+    updateHUD();
+
+    var a = randInt(2, 10);
+    var b = randInt(1, a - 1);
+    var correct = a - b;
+
+    renderStars(starsA, a);
+    renderStars(starsB, b);
+    equationEl.textContent = a + ' − ' + b + ' = ?';
+
+    var choices = makeChoices(correct, 1, 9);
+    choiceGrid.innerHTML = '';
+    choices.forEach(function (val) {
+      var btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = val;
+      btn.addEventListener('click', function () {
+        if (answered) return;
+        answered = true;
+        if (window.SoundFX) SoundFX.click();
+        handleAnswer(val === correct, correct, btn);
+      });
+      choiceGrid.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(isCorrect, correct, clickedBtn) {
+    choiceGrid.querySelectorAll('.choice-btn').forEach(function (b) {
+      if (Number(b.textContent) === correct) b.classList.add('correct');
+    });
+    if (!isCorrect) clickedBtn.classList.add('wrong');
+
+    if (isCorrect) {
+      score++;
+      if (window.SoundFX) SoundFX.correct();
+      if (window.Mascot)  Mascot.happy(600);
+    } else {
+      if (window.SoundFX) SoundFX.wrong();
+      if (window.Mascot)  Mascot.sad(800);
     }
 
-    // =============================
-    // ELEMENTS
-    // =============================
-    const puluhBox = document.getElementById("puluhTop");
-    const saBox = document.getElementById("saTop");
-    const puluhBottomBox = document.getElementById("puluhBottom");
-    const saBottomBox = document.getElementById("saBottom");
-    const hud = document.getElementById("hud");
-    const feedback = document.getElementById("feedback");
-
-    
-
-    // =============================
-    // SAFE ELEMENT-FROM-POINT
-    // =============================
-    function elementFromPointSafe(x, y) {
-        let el = document.elementFromPoint(x, y);
-        if (el) return el;
-
-        const d = [1, -1, 2, -2];
-        for (let dx of d) {
-            for (let dy of d) {
-                el = document.elementFromPoint(x + dx, y + dy);
-                if (el) return el;
-            }
-        }
-        return null;
-    }
-
-    // =============================
-    // HUD
-    // =============================
-    function setHUD(t) {
-        if (!hud) return;
-        hud.style.display = t ? "block" : "none";
-        hud.textContent = t || "";
-    }
-
-    // =============================
-    // RENDER NUMBERS
-    // =============================
-    function renderNumbers() {
-        puluhBox.textContent = previewPuluhDeducted ? puluhTop - 1 : puluhTop;
-        saBox.textContent = saTop;
-        puluhBottomBox.textContent = puluhBottom;
-        saBottomBox.textContent = saBottom;
-    }
-
-    // =============================
-    // NEW QUESTION
-    // =============================
-    function soalanBaru() {
-
-        feedback.style.display = "none";
-
-        sudahPinjam = false;
-        previewPuluhDeducted = false;
-
-        // Reset colors
-        puluhBox.classList.remove("red");
-        saBox.classList.remove("green", "preview");
-        puluhBox.style.color = "";
-        saBox.style.color = "";
-
-        if (quizMode) {
-            currentSoalan++;
-            if (currentSoalan > totalSoalan) {
-                const betul = score;
-                const salah = totalSoalan - score;
-                const acc = Math.round((betul / totalSoalan) * 100);
-                location.href =
-                    `quiz_result.html?betul=${betul}&salah=${salah}&acc=${acc}`;
-                return;
-            }
-            setHUD(`Soalan ${currentSoalan} / ${totalSoalan}`);
-        } else setHUD("");
-
-        let perluPinjam = Math.random() < 0.5;
-
-        if (perluPinjam) {
-            do {
-                puluhTop = Math.floor(Math.random() * 8) + 2;
-                puluhBottom = Math.floor(Math.random() * puluhTop);
-                saBottom = Math.floor(Math.random() * 9) + 1;
-                saTop = Math.floor(Math.random() * saBottom);
-            } while (saTop >= saBottom);
+    if (quizMode) {
+      setTimeout(function () {
+        if (qNum >= totalQ) {
+          finishQuiz();
         } else {
-            do {
-                puluhTop = Math.floor(Math.random() * 8) + 2;
-                puluhBottom = Math.floor(Math.random() * puluhTop);
-                saTop = Math.floor(Math.random() * 9) + 1;
-                saBottom = Math.floor(Math.random() * saTop);
-            } while (saTop < saBottom);
+          qNum++;
+          newQuestion();
         }
-
-        renderNumbers();
-
-        document.querySelectorAll(".dropzone").forEach(d => {
-            d.textContent = "_";
-            d.style.color = "#999";
-            d.style.borderColor = "#333";
-        });
+      }, 750);
+    } else {
+      feedbackEl.style.display = 'block';
+      feedbackEl.style.color   = isCorrect ? 'green' : '#c0392b';
+      feedbackEl.textContent   = isCorrect ? '✅ Betul! Hebat!' : '❌ Salah! Jawapan: ' + correct;
+      btnNext.style.display = 'inline-block';
     }
-
-    soalanBaru();
-
-    // =============================
-    // FLOAT BORROW LERP
-    // =============================
-    function rafLoop() {
-        currentPos.x += (targetPos.x - currentPos.x) * 0.22;
-        currentPos.y += (targetPos.y - currentPos.y) * 0.22;
-        if (floatBorrow) {
-            floatBorrow.style.left = currentPos.x + "px";
-            floatBorrow.style.top = currentPos.y + "px";
-        }
-        rafId = requestAnimationFrame(rafLoop);
-    }
-
-    function startFloatBorrow(x, y) {
-        if (floatBorrow) floatBorrow.remove();
-
-        floatBorrow = document.createElement("div");
-        floatBorrow.className = "floating10";
-        floatBorrow.textContent = "10+";
-        floatBorrow.style.position = "absolute";
-        floatBorrow.style.zIndex = "99999";
-        floatBorrow.style.pointerEvents = "none";
-
-        floatBorrow.style.left = x + "px";
-        floatBorrow.style.top = y + "px";
-
-        document.body.appendChild(floatBorrow);
-
-        currentPos = { x, y };
-        targetPos = { x, y };
-
-        setTimeout(() => floatBorrow.classList.add("active"), 5);
-
-        if (!rafId) rafLoop();
-    }
-
-    function updateFloatPreview(sa) {
-        if (floatBorrow) floatBorrow.textContent = "10+" + sa;
-    }
-    function updateFloatDefault() {
-        if (floatBorrow) floatBorrow.textContent = "10+";
-    }
-
-    function stopFloat() {
-        if (!floatBorrow) return;
-
-        floatBorrow.classList.remove("active");
-        const f = floatBorrow;
-        floatBorrow = null;
-
-        setTimeout(() => {
-            try { f.remove(); } catch (e) {}
-            cancelAnimationFrame(rafId);
-            rafId = null;
-        }, 120);
-    }
-
-    // =============================
-    // BORROW — MOUSE
-    // =============================
-    puluhBox.addEventListener("mousedown", e => {
-
-        if (sudahPinjam || !(saTop < saBottom)) return;
-
-        previewPuluhDeducted = true;
-        puluhBox.classList.add("red");
-        renderNumbers();
-
-        startFloatBorrow(e.pageX, e.pageY - 25);
-
-        function onMove(ev) {
-            targetPos.x = ev.pageX;
-            targetPos.y = ev.pageY - 25;
-
-            const hit = elementFromPointSafe(ev.clientX, ev.clientY);
-            const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
-
-            if (hoverSa) {
-                saBox.classList.add("preview");
-                saBox.textContent = saTop + 10;
-                updateFloatPreview(saTop);
-            } else {
-                saBox.classList.remove("preview");
-                saBox.textContent = saTop;
-                updateFloatDefault();
-            }
-        }
-
-        function onUp(ev) {
-            const hit = elementFromPointSafe(ev.clientX, ev.clientY);
-            const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
-
-            if (hoverSa) {
-                puluhTop -= 1;
-                saTop += 10;
-                sudahPinjam = true;
-
-                puluhBox.classList.add("red");
-                saBox.classList.add("green");
-                saBox.textContent = saTop;
-
-            } else {
-                previewPuluhDeducted = false;
-                puluhBox.classList.remove("red");
-                saBox.classList.remove("preview");
-                renderNumbers();
-            }
-
-            stopFloat();
-            window.removeEventListener("mousemove", onMove);
-            window.removeEventListener("mouseup", onUp);
-        }
-
-        window.addEventListener("mousemove", onMove);
-        window.addEventListener("mouseup", onUp);
-    });
-
-    // =============================
-    // BORROW — TOUCH
-    // =============================
-    puluhBox.addEventListener("touchstart", e => {
-
-        if (sudahPinjam || !(saTop < saBottom)) return;
-
-        isTouchBorrow = true;
-
-        previewPuluhDeducted = true;
-        puluhBox.classList.add("red");
-        renderNumbers();
-
-        let t = e.touches[0];
-        startFloatBorrow(t.pageX, t.pageY - 30);
-
-    }, { passive:false });
-
-    puluhBox.addEventListener("touchmove", e => {
-
-        if (!isTouchBorrow) return;
-        e.preventDefault();
-
-        let t = e.touches[0];
-        targetPos.x = t.pageX;
-        targetPos.y = t.pageY - 30;
-
-        const hit = elementFromPointSafe(t.clientX, t.clientY);
-        const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
-
-        if (hoverSa) {
-            saBox.classList.add("preview");
-            saBox.textContent = saTop + 10;
-            updateFloatPreview(saTop);
-        } else {
-            saBox.classList.remove("preview");
-            saBox.textContent = saTop;
-            updateFloatDefault();
-        }
-
-    }, { passive:false });
-
-    puluhBox.addEventListener("touchend", e => {
-
-        if (!isTouchBorrow) return;
-        isTouchBorrow = false;
-
-        let t = e.changedTouches[0];
-        const hit = elementFromPointSafe(t.clientX, t.clientY);
-        const hoverSa = hit && (hit.id === "saTop" || hit.closest?.("#saTop"));
-
-        if (hoverSa) {
-            puluhTop -= 1;
-            saTop += 10;
-            sudahPinjam = true;
-
-            puluhBox.classList.add("red");
-            saBox.classList.add("green");
-            saBox.textContent = saTop;
-
-        } else {
-            previewPuluhDeducted = false;
-            puluhBox.classList.remove("red");
-            saBox.classList.remove("preview");
-            renderNumbers();
-        }
-
-        stopFloat();
-
-    });
-
-    // ============================================
-    // NUMBER PAD — ADDITION-STYLE ANIMATION MERGE
-    // ============================================
-    const nums = document.querySelectorAll(".num");
-    const dropzones = document.querySelectorAll(".dropzone");
-
-    nums.forEach(num => {
-
-        // TOUCH START (floating preview + opacity feedback)
-        num.addEventListener("touchstart", e => {
-
-            e.preventDefault();
-
-            const digit = num.textContent;
-            const touch = e.touches[0];
-
-            // Floating preview
-            const float = document.createElement("div");
-            float.className = "floating-preview";
-            float.textContent = digit;
-            float.style.position = "absolute";
-            float.style.zIndex = "99999";
-            float.style.pointerEvents = "none";
-            float.style.left = touch.pageX + "px";
-            float.style.top = (touch.pageY - 40) + "px";
-
-            document.body.appendChild(float);
-
-            num.style.opacity = "0.4";
-
-            function moveHandler(ev) {
-                const t = ev.touches[0];
-                float.style.left = t.pageX + "px";
-                float.style.top = (t.pageY - 40) + "px";
-
-                dropzones.forEach(dz => {
-                    const rect = dz.getBoundingClientRect();
-                    const inside =
-                        t.clientX >= rect.left &&
-                        t.clientX <= rect.right &&
-                        t.clientY >= rect.top &&
-                        t.clientY <= rect.bottom;
-
-                    dz.style.background = inside ? "#ffedc2" : "";
-                    dz.style.borderColor = inside ? "#ff9900" : "#333";
-                });
-            }
-
-            function endHandler(ev) {
-                const t = ev.changedTouches[0];
-                const hit = elementFromPointSafe(t.clientX, t.clientY);
-                const dz = hit && hit.closest?.(".dropzone");
-
-                if (dz) {
-                    dz.textContent = digit;
-                    dz.style.color = "#000";
-                    dz.style.borderColor = "#4CAF50";
-                    if (quizMode) autoNext();
-                }
-
-                float.remove();
-                num.style.opacity = "1";
-
-                dropzones.forEach(dz => {
-                    dz.style.background = "";
-                    dz.style.borderColor = "#333";
-                });
-
-                window.removeEventListener("touchmove", moveHandler);
-                window.removeEventListener("touchend", endHandler);
-            }
-
-            window.addEventListener("touchmove", moveHandler, { passive:false });
-            window.addEventListener("touchend", endHandler, { passive:true });
-
-        }, { passive:false });
-
-        // PC click pop animation (same as addition)
-        num.addEventListener("mousedown", () => {
-            num.style.transform = "scale(1.15)";
-            num.style.transition = "transform 0.12s";
-        });
-
-        num.addEventListener("mouseup", () => {
-            num.style.transform = "scale(1)";
-        });
-
-        num.addEventListener("mouseleave", () => {
-            num.style.transform = "scale(1)";
-        });
-
-    });
-
-// =============================================
-// DESKTOP DRAG & DROP (MOUSE MODE)
-// =============================================
-const numsDesktop = document.querySelectorAll(".num");
-const dropzonesDesktop = document.querySelectorAll(".dropzone");
-
-// DRAGSTART
-numsDesktop.forEach(num => {
-    num.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text/plain", num.textContent);
-        num.classList.add("dragging");
-    });
-
-    num.addEventListener("dragend", () => {
-        num.classList.remove("dragging");
-    });
-});
-
-// DRAGOVER → wajib untuk benarkan drop
-dropzonesDesktop.forEach(zone => {
-    zone.addEventListener("dragover", e => {
-        e.preventDefault();
-        zone.style.borderColor = "#4CAF50";
-        zone.style.background = "#e6ffe6";
-    });
-
-    zone.addEventListener("dragleave", () => {
-        zone.style.borderColor = "#333";
-        zone.style.background = "";
-    });
-
-    // DROP
-    zone.addEventListener("drop", e => {
-        e.preventDefault();
-        const digit = e.dataTransfer.getData("text/plain");
-
-        zone.textContent = digit;
-        zone.style.color = "#000";
-        zone.style.borderColor = "#4CAF50";
-        zone.style.background = "";
-
-        // Auto next (quiz mode)
-        if (quizMode) {
-            const p = document.getElementById("ansPuluh").textContent.trim();
-            const s = document.getElementById("ansSa").textContent.trim();
-
-            if (/^[0-9]$/.test(p) && /^[0-9]$/.test(s)) {
-                setTimeout(() => cekJawapan(), 150);
-            }
-        }
-    });
-});
-
-
-    // =============================
-    // AUTO NEXT
-    // =============================
-    function autoNext() {
-        if (!quizMode) return;
-
-        const p = document.getElementById("ansPuluh").textContent.trim();
-        const s = document.getElementById("ansSa").textContent.trim();
-
-        if (/^[0-9]$/.test(p) && /^[0-9]$/.test(s)) {
-            setTimeout(() => cekJawapan(), 150);
-        }
-    }
-
-    // =============================
-    // CEK JAWAPAN
-    // =============================
-    window.cekJawapan = function() {
-
-        const ansP = document.getElementById("ansPuluh").textContent.trim();
-        const ansS = document.getElementById("ansSa").textContent.trim();
-
-        let saRes = saTop - saBottom;
-        let pulRes = puluhTop - puluhBottom;
-
-        if (!sudahPinjam && saTop < saBottom) {
-            saRes = saTop + 10 - saBottom;
-            pulRes = puluhTop - 1 - puluhBottom;
-        }
-
-        const betul = (ansP == pulRes && ansS == saRes);
-
-        if (quizMode) {
-            if (betul) {
-                score++;
-                if (window.SoundFX) SoundFX.correct();
-                if (window.Mascot) Mascot.happy();
-            } else {
-                if (window.SoundFX) SoundFX.wrong();
-                if (window.Mascot) Mascot.sad();
-            }
-            setTimeout(() => soalanBaru(), 650);
-            return;
-        }
-
-        feedback.style.display = "block";
-        if (betul) {
-            feedback.style.color = "green";
-            feedback.textContent = "✅ Betul! Hebat!";
-            if (window.SoundFX) SoundFX.correct();
-            if (window.Mascot) Mascot.happy();
-        } else {
-            feedback.style.color = "red";
-            feedback.textContent = `❌ Salah! Jawapan sebenar: ${pulRes}${saRes}`;
-            if (window.SoundFX) SoundFX.wrong();
-            if (window.Mascot) Mascot.sad();
-        }
-    };
-
-    window.soalanBaru = soalanBaru;
-});
+  }
+
+  function finishQuiz() {
+    var wrong = totalQ - score;
+    var acc   = Math.round((score / totalQ) * 100);
+    location.href = 'quiz_result.html?betul=' + score + '&salah=' + wrong + '&acc=' + acc;
+  }
+
+  window.nextQuestion = function () {
+    if (!quizMode) { qNum++; newQuestion(); }
+  };
+
+  newQuestion();
+})();

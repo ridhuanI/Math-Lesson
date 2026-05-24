@@ -1,123 +1,43 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="stylesheet" href="style.css">
-
-    <title>Operasi Tolak</title>
-
-    <style>
-        /* Allow drag on mobile for specific elements only */
-        .num,
-        #puluhTop,
-        .dropzone {
-            touch-action: none;
-        }
-
-        /* FLOATING PREVIEW (from addition) */
-        .floating-preview {
-            position: absolute;
-            font-size: 45px;
-            font-weight: 700;
-            background: rgba(255,255,255,0.9);
-            padding: 5px 12px;
-            border-radius: 8px;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            opacity: 1;
-            z-index: 99999;
-        }
-
-        /* floating 10+ borrow */
-        .floating10 {
-            position: absolute;
-            font-size: 40px;
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.15s;
-            pointer-events: none;
-            z-index: 99999;
-        }
-
-        .floating10.active {
-            opacity: 1;
-        }
-
-        /* Number pad pop animation */
-        .num {
-            transition: transform 0.12s, opacity 0.12s;
-        }
-
-        .num:active {
-            transform: scale(1.15);
-        }
-
-        /* highlight effect for dropzone */
-        .dropzone.highlight {
-            background: #ffedc2;
-            border-color: #ff9900 !important;
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik Tolak</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
+.math-equation { font-size: 54px; font-weight: 700; color: #ff6600; margin-bottom: 10px; letter-spacing: 2px; }
+.stars-display { display: flex; justify-content: center; align-items: flex-start; gap: 16px; min-height: 32px; }
+.stars-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 120px; }
+.math-star {
+  display: inline-block; font-size: 20px; opacity: 0;
+  animation: emoji-pop 0.3s ease forwards; margin: 1px;
+}
+</style>
 </head>
-
 <body>
 
-<h2 class="page-title">🧮 Operasi Tolak</h2>
+<h2 class="page-title">➖ Matematik Tolak</h2>
+<div class="hud-bar" id="hud"></div>
 
-<!-- HUD (Quiz Mode) -->
-<div id="hud" style="display:none; font-size:20px; margin-bottom:10px; font-weight:600;"></div>
-
-<!-- TOP -->
-<div class="row">
-  <div class="box" id="puluhTop" draggable="true">3</div>
-  <div class="box" id="saTop">2</div>
+<div class="question-card">
+  <div class="math-equation" id="equation"></div>
+  <div class="stars-display">
+    <div class="stars-row" id="starsA"></div>
+    <div style="font-size:20px;color:#bbb;padding-top:2px;">−</div>
+    <div class="stars-row" id="starsB"></div>
+  </div>
 </div>
 
-<!-- BOTTOM -->
-<div class="row-bawah">
-  <div class="minus">−</div>
-  <div class="box" id="puluhBottom">5</div>
-  <div class="box" id="saBottom">2</div>
-</div>
+<div class="choice-grid" id="choiceGrid"></div>
 
-<div class="garis"></div>
+<div class="subject-feedback" id="feedback" style="display:none;"></div>
+<button class="next-btn" id="btnNext" onclick="nextQuestion()" style="display:none;">➡️ Seterusnya</button>
 
-<!-- ANSWER -->
-<div class="row" id="answerRow">
-  <div class="dropzone" id="ansPuluh">_</div>
-  <div class="dropzone" id="ansSa">_</div>
-</div>
+<a href="addition.html" style="display:inline-block;margin-top:10px;font-size:17px;background:#FF6B6B;color:#fff;padding:10px 22px;border-radius:12px;text-decoration:none;box-shadow:0 3px 6px rgba(0,0,0,0.15);">➕ Cuba Tambah!</a>
 
-<!-- NUMBER PAD -->
-<div id="numberPadWrapper" style="margin-top:30px;">
-    <div id="numberPad">
-        <p><strong>Seret nombor ke kotak jawapan:</strong></p>
-
-        <div class="num-container">
-            <div class="num" draggable="true">0</div>
-            <div class="num" draggable="true">1</div>
-            <div class="num" draggable="true">2</div>
-            <div class="num" draggable="true">3</div>
-            <div class="num" draggable="true">4</div>
-            <div class="num" draggable="true">5</div>
-            <div class="num" draggable="true">6</div>
-            <div class="num" draggable="true">7</div>
-            <div class="num" draggable="true">8</div>
-            <div class="num" draggable="true">9</div>
-        </div>
-    </div>
-
-    <div id="feedback" style="display:none;"></div>
-</div>
-
-<button id="btnCek" onclick="cekJawapan()">Cek Jawapan</button>
-<button id="btnBaru" onclick="soalanBaru()">🔁 Soalan Baru</button>
-
-<br><br>
-<a href="index.html" class="back-link">🏠 Kembali ke Menu Utama</a>
+<a href="index.html" class="back-link">🏠 Menu Utama</a>
 
 <script src="sounds.js"></script>
 <script src="mascot.js"></script>
