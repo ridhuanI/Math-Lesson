@@ -700,6 +700,18 @@ button {
 .drag-shape-card .shape-hexagon   { width: 56px; height: 56px; }
 .drag-shape-card .shape-diamond   { width: 44px; height: 56px; }
 
+/* Shape sizes inside silhouette zones */
+.silhouette-zone .shape-circle    { width: 64px; height: 64px; }
+.silhouette-zone .shape-square    { width: 58px; height: 58px; border-radius: 6px; }
+.silhouette-zone .shape-triangle  { width: 64px; height: 64px; }
+.silhouette-zone .shape-rectangle { width: 82px; height: 44px; border-radius: 5px; }
+.silhouette-zone .shape-star      { width: 64px; height: 64px; }
+.silhouette-zone .shape-heart     { font-size: 56px; width: auto; height: auto; }
+.silhouette-zone .shape-oval      { width: 72px; height: 48px; }
+.silhouette-zone .shape-pentagon  { width: 62px; height: 62px; }
+.silhouette-zone .shape-hexagon   { width: 62px; height: 62px; }
+.silhouette-zone .shape-diamond   { width: 48px; height: 62px; }
+
 /* Silhouette zone */
 .silhouette-zone {
   border: 2px dashed #bbb;
@@ -709,6 +721,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 90px;
   min-height: 90px;
   transition: background 0.2s, border-color 0.2s;
 }
