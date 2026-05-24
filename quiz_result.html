@@ -219,6 +219,51 @@
         fb.style.transition = "opacity 0.7s ease";
         fb.style.opacity = "1";
     }, totalDelay);
+
+    // Confetti for 3 stars
+    if (stars === 3) {
+        var confettiColors = ['#FF6B6B','#4ECDC4','#FFE66D','#A8E6CF','#FF8B94','#fff','#FFB347'];
+        for (var ci = 0; ci < 50; ci++) {
+            (function () {
+                var p = document.createElement('div');
+                p.className = 'confetti-piece';
+                p.style.left = (Math.random() * 100) + 'vw';
+                p.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                var dur = 1.5 + Math.random() * 2;
+                p.style.animationDuration = dur + 's';
+                p.style.animationDelay = (Math.random() * 1.2) + 's';
+                p.style.width  = (8  + Math.random() * 8) + 'px';
+                p.style.height = (12 + Math.random() * 10) + 'px';
+                p.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                document.body.appendChild(p);
+                setTimeout(function () { p.remove(); }, (dur + 2) * 1000);
+            })();
+        }
+    }
+
+    // Play sound after star animation settles
+    var snd = document.createElement('script');
+    snd.src = 'sounds.js';
+    snd.onload = function () {
+        var delay = stars === 3 ? 400 : 200;
+        setTimeout(function () {
+            if (stars === 3)     SoundFX.celebrate();
+            else if (stars >= 1) SoundFX.correct();
+        }, delay);
+    };
+    document.head.appendChild(snd);
+
+    // Mascot reacts on result
+    var msc = document.createElement('script');
+    msc.src = 'mascot.js';
+    msc.onload = function () {
+        setTimeout(function () {
+            if (stars === 3)     Mascot.excited(5000);
+            else if (stars >= 1) Mascot.happy(3000);
+            else                 Mascot.sad(3000);
+        }, 500);
+    };
+    document.head.appendChild(msc);
 </script>
 
 

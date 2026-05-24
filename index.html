@@ -3,56 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Permainan Matematik</title>
-
+<title>Belajar Bersama!</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  body {
-
-    text-align: center;
-    padding-top: 60px;
-  }
-
-  h1 {
-    color: #ff6600;
-    margin-bottom: 40px;
-  }
-
-  .menu-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  a {
-    display: inline-block;
-    text-decoration: none;
-    font-size: 26px;
-    background: #ffd966;
-    color: #333;
-    padding: 15px 40px;
-    border-radius: 12px;
-    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-    transition: transform 0.15s, background 0.3s;
-  }
-
-  a:hover {
-    transform: scale(1.05);
-    background: #ffeb99;
-  }
+body {
+  padding-top: 40px;
+  padding-bottom: 60px;
+  text-align: center;
+}
+.app-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #ff6600;
+  margin-bottom: 6px;
+}
+.app-subtitle {
+  font-size: 18px;
+  color: #888;
+  margin-bottom: 28px;
+}
 </style>
 </head>
 <body>
 
-<h1>Matematik Interaktif</h1>
+<div class="app-title">🌟 Belajar Bersama!</div>
+<div class="app-subtitle">Pilih subjek untuk belajar</div>
 
-<div class="menu-container">
-  <a href="addition.html">➕ Tambah</a>
-  <a href="subtraction.html">➖ Tolak</a>
-  <a href="quiz_menu.html">📝 Quiz</a>
-
+<div class="subject-grid">
+  <a class="subject-card card-math" href="addition.html">
+    <span class="card-icon">🔢</span>
+    <span class="card-label">Matematik</span>
+    <span class="card-sub">Tambah &amp; Tolak</span>
+  </a>
+  <a class="subject-card card-letters" href="letters.html">
+    <span class="card-icon">🔤</span>
+    <span class="card-label">Huruf</span>
+    <span class="card-sub">A hingga Z</span>
+  </a>
+  <a class="subject-card card-counting" href="counting.html">
+    <span class="card-icon">⭐</span>
+    <span class="card-label">Mengira</span>
+    <span class="card-sub">1 hingga 10</span>
+  </a>
+  <a class="subject-card card-shapes" href="shapes.html">
+    <span class="card-icon">🔷</span>
+    <span class="card-label">Bentuk &amp; Warna</span>
+    <span class="card-sub">Bulatan, Segi...</span>
+  </a>
+  <a class="subject-card card-animals" href="animals.html">
+    <span class="card-icon">🐘</span>
+    <span class="card-label">Haiwan</span>
+    <span class="card-sub">Binatang &amp; Nama</span>
+  </a>
 </div>
 
+<script src="sounds.js"></script>
+<script src="mascot.js"></script>
+<script>
+  document.querySelectorAll('.subject-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      if (window.SoundFX) SoundFX.click();
+    });
+  });
+</script>
 </body>
 </html>

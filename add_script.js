@@ -201,33 +201,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (quizMode) {
 
-            // Kira markah senyap
             if (ansPuluh == puluhSum && ansSa == saSum) {
                 scoreQ++;
+                if (window.SoundFX) SoundFX.correct();
+                if (window.Mascot) Mascot.happy();
+            } else {
+                if (window.SoundFX) SoundFX.wrong();
+                if (window.Mascot) Mascot.sad();
             }
 
-            // Auto soalan baru
             setTimeout(() => {
                 soalanBaru();
-            }, 200);
+            }, 650);
 
-            return; // STOP behaviour biasa!
+            return;
         }
 
         // ============================================
         // NORMAL MODE (WITH FEEDBACK)
         // ============================================
 
-        // Hide number pad, show feedback panel
         if (numberPad) numberPad.style.display = "none";
         if (feedback) feedback.style.display = "block";
 
         if (ansPuluh == puluhSum && ansSa == saSum) {
             feedback.textContent = "✅ Betul! Hebat!";
             feedback.style.color = "green";
+            if (window.SoundFX) SoundFX.correct();
+            if (window.Mascot) Mascot.happy();
         } else {
             feedback.textContent = `❌ Salah! Jawapan sebenar ialah ${puluhSum}${saSum}`;
             feedback.style.color = "red";
+            if (window.SoundFX) SoundFX.wrong();
+            if (window.Mascot) Mascot.sad();
         }
     }
 

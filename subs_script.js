@@ -506,16 +506,30 @@ dropzonesDesktop.forEach(zone => {
         const betul = (ansP == pulRes && ansS == saRes);
 
         if (quizMode) {
-            if (betul) score++;
-            setTimeout(() => soalanBaru(), 180);
+            if (betul) {
+                score++;
+                if (window.SoundFX) SoundFX.correct();
+                if (window.Mascot) Mascot.happy();
+            } else {
+                if (window.SoundFX) SoundFX.wrong();
+                if (window.Mascot) Mascot.sad();
+            }
+            setTimeout(() => soalanBaru(), 650);
             return;
         }
 
         feedback.style.display = "block";
-        feedback.style.color = betul ? "green" : "red";
-        feedback.textContent = betul ?
-            "Betul!" :
-            `Salah! Jawapan sebenar: ${pulRes}${saRes}`;
+        if (betul) {
+            feedback.style.color = "green";
+            feedback.textContent = "✅ Betul! Hebat!";
+            if (window.SoundFX) SoundFX.correct();
+            if (window.Mascot) Mascot.happy();
+        } else {
+            feedback.style.color = "red";
+            feedback.textContent = `❌ Salah! Jawapan sebenar: ${pulRes}${saRes}`;
+            if (window.SoundFX) SoundFX.wrong();
+            if (window.Mascot) Mascot.sad();
+        }
     };
 
     window.soalanBaru = soalanBaru;
