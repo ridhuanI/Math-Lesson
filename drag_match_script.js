@@ -2,12 +2,25 @@
   'use strict';
 
   var SHAPES = [
-    { id:'bulatan',            name:'Bulatan',            css:'shape-circle',    unicode:null },
-    { id:'segi-empat',         name:'Segi Empat',          css:'shape-square',    unicode:null },
-    { id:'segi-tiga',          name:'Segi Tiga',           css:'shape-triangle',  unicode:null },
-    { id:'segi-empat-panjang', name:'Segi Empat Panjang',  css:'shape-rectangle', unicode:null },
-    { id:'bintang',            name:'Bintang',             css:'shape-star',      unicode:null },
-    { id:'hati',               name:'Hati',                css:'shape-heart',     unicode:'♥' },
+    { id:'bulatan',           name:'Bulatan',           css:'shape-circle',    unicode:null, decoys:['bujur'] },
+    { id:'segi-empat',        name:'Segi Empat',         css:'shape-square',    unicode:null, decoys:['berlian','segiempat-panjang'] },
+    { id:'segi-tiga',         name:'Segi Tiga',          css:'shape-triangle',  unicode:null, decoys:[] },
+    { id:'segiempat-panjang', name:'Segi Empat Panjang', css:'shape-rectangle', unicode:null, decoys:['segi-empat'] },
+    { id:'bintang',           name:'Bintang',            css:'shape-star',      unicode:null, decoys:[] },
+    { id:'hati',              name:'Hati',               css:'shape-heart',     unicode:'♥',  decoys:[] },
+    { id:'bujur',             name:'Bujur',              css:'shape-oval',      unicode:null, decoys:['bulatan'] },
+    { id:'pentagon',          name:'Pentagon',           css:'shape-pentagon',  unicode:null, decoys:['heksagon'] },
+    { id:'heksagon',          name:'Heksagon',           css:'shape-hexagon',   unicode:null, decoys:['pentagon'] },
+    { id:'berlian',           name:'Berlian',            css:'shape-diamond',   unicode:null, decoys:['segi-empat'] },
+  ];
+
+  var SHAPE_BY_ID = {};
+  SHAPES.forEach(function (s) { SHAPE_BY_ID[s.id] = s; });
+
+  var DIFFICULTIES = [
+    { label:'🟢 Mudah',     sourceCount:3, decoyCount:0, pool:['bulatan','segi-empat','segi-tiga','hati','bintang'] },
+    { label:'🟡 Sederhana', sourceCount:4, decoyCount:2, pool:['bulatan','segi-empat','segi-tiga','segiempat-panjang','bintang','hati','pentagon','heksagon'] },
+    { label:'🔴 Sukar',     sourceCount:5, decoyCount:3, pool:null },
   ];
 
   var COLORS = ['#E74C3C','#3498DB','#F1C40F','#2ECC71','#E67E22','#9B59B6','#FF69B4'];
@@ -18,11 +31,13 @@
   var roundNum    = 1;
   var score       = 0;
   var matchCount  = 0;
+  var sourceCount = 0;
   var roundPerfect = true;
+  var currentDiff  = 0;
 
   var hudEl      = document.getElementById('hud');
   var shapesGrid = document.getElementById('shapesGrid');
-  var namesGrid  = document.getElementById('namesGrid');
+  var siluetGrid = document.getElementById('siluetGrid');
   var feedbackEl = document.getElementById('feedback');
   var btnNext    = document.getElementById('btnNext');
 
@@ -53,6 +68,20 @@
     return div;
   }
 
+  function makeSilhouetteEl(shape) {
+    if (shape.unicode) {
+      var span = document.createElement('span');
+      span.className = 'shape-el ' + shape.css;
+      span.style.color = '#ABABAB';
+      span.textContent = shape.unicode;
+      return span;
+    }
+    var div = document.createElement('div');
+    div.className = 'shape-el ' + shape.css;
+    div.style.background = '#ABABAB';
+    return div;
+  }
+
   function renderRound() {
     matchCount   = 0;
     roundPerfect = true;
@@ -60,11 +89,50 @@
     btnNext.style.display    = 'none';
     updateHUD();
 
-    var roundShapes = shuffle(SHAPES.slice()).slice(0, 4);
-    var roundColors = shuffle(COLORS.slice()).slice(0, 4);
+    var diff = DIFFICULTIES[currentDiff];
+    var pool = diff.pool
+      ? diff.pool.map(function (id) { return SHAPE_BY_ID[id]; })
+      : SHAPES.slice();
 
-    // --- Shape cards (draggable) ---
+    var roundShapes = shuffle(pool).slice(0, diff.sourceCount);
+    sourceCount = roundShapes.length;
+
+    // Build decoy list — prefer shapes from each source shape's decoys array
+    var usedIds = {};
+    roundShapes.forEach(function (s) { usedIds[s.id] = true; });
+
+    var decoys = [];
+    if (diff.decoyCount > 0) {
+      // Collect candidate decoys from each source shape's decoys list
+      var candidates = [];
+      roundShapes.forEach(function (s) {
+        s.decoys.forEach(function (did) {
+          if (!usedIds[did] && SHAPE_BY_ID[did] && candidates.indexOf(did) === -1) {
+            candidates.push(did);
+          }
+        });
+      });
+      // Shuffle candidates and pick up to decoyCount
+      candidates = shuffle(candidates);
+      for (var i = 0; i < Math.min(diff.decoyCount, candidates.length); i++) {
+        var d = SHAPE_BY_ID[candidates[i]];
+        if (d) { decoys.push(d); usedIds[d.id] = true; }
+      }
+      // If still under decoyCount, fill from remaining pool shapes
+      if (decoys.length < diff.decoyCount) {
+        var remaining = pool.filter(function (s) { return !usedIds[s.id]; });
+        remaining = shuffle(remaining);
+        for (var j = 0; j < remaining.length && decoys.length < diff.decoyCount; j++) {
+          decoys.push(remaining[j]);
+        }
+      }
+    }
+
+    var silhouetteShapes = shuffle(roundShapes.concat(decoys));
+
+    // --- Source shape cards (draggable) ---
     shapesGrid.innerHTML = '';
+    var roundColors = shuffle(COLORS.slice()).slice(0, roundShapes.length);
     roundShapes.forEach(function (shape, i) {
       var card = document.createElement('div');
       card.className = 'drag-shape-card';
@@ -72,7 +140,6 @@
       card.dataset.shapeId = shape.id;
       card.appendChild(makeShapeEl(shape, roundColors[i]));
 
-      // Desktop drag
       card.addEventListener('dragstart', function (e) {
         e.dataTransfer.setData('text/plain', shape.id);
         card.classList.add('dragging');
@@ -81,20 +148,17 @@
         card.classList.remove('dragging');
       });
 
-      // Touch drag
       addTouchDrag(card, shape.id);
-
       shapesGrid.appendChild(card);
     });
 
-    // --- Name drop zones (shuffled order) ---
-    var shuffledForNames = shuffle(roundShapes.slice());
-    namesGrid.innerHTML = '';
-    shuffledForNames.forEach(function (shape) {
+    // --- Silhouette drop zones ---
+    siluetGrid.innerHTML = '';
+    silhouetteShapes.forEach(function (shape) {
       var zone = document.createElement('div');
-      zone.className = 'name-dropzone';
+      zone.className = 'silhouette-zone';
       zone.dataset.expectedId = shape.id;
-      zone.textContent = shape.name;
+      zone.appendChild(makeSilhouetteEl(shape));
 
       zone.addEventListener('dragover', function (e) {
         if (zone.classList.contains('matched')) return;
@@ -109,11 +173,11 @@
         zone.classList.remove('hover');
         if (zone.classList.contains('matched')) return;
         var shapeId = e.dataTransfer.getData('text/plain');
-        var card    = shapesGrid.querySelector('[data-shape-id="' + shapeId + '"]');
+        var card = shapesGrid.querySelector('[data-shape-id="' + shapeId + '"]');
         handleDrop(shapeId, zone, card);
       });
 
-      namesGrid.appendChild(zone);
+      siluetGrid.appendChild(zone);
     });
   }
 
@@ -125,7 +189,6 @@
       var touch = e.touches[0];
       var rect  = card.getBoundingClientRect();
 
-      // Floating clone that follows the finger
       var preview = card.cloneNode(true);
       preview.style.cssText = [
         'position:fixed',
@@ -148,7 +211,7 @@
         preview.style.left = (t.clientX - rect.width  / 2) + 'px';
         preview.style.top  = (t.clientY - rect.height / 2) + 'px';
 
-        namesGrid.querySelectorAll('.name-dropzone').forEach(function (zone) {
+        siluetGrid.querySelectorAll('.silhouette-zone').forEach(function (zone) {
           if (zone.classList.contains('matched')) return;
           var zr = zone.getBoundingClientRect();
           var inside = t.clientX >= zr.left && t.clientX <= zr.right &&
@@ -161,12 +224,12 @@
         var t = ev.changedTouches[0];
         preview.remove();
         card.classList.remove('dragging');
-        namesGrid.querySelectorAll('.name-dropzone').forEach(function (z) {
+        siluetGrid.querySelectorAll('.silhouette-zone').forEach(function (z) {
           z.classList.remove('hover');
         });
 
         var hit  = document.elementFromPoint(t.clientX, t.clientY);
-        var zone = hit && hit.closest && hit.closest('.name-dropzone');
+        var zone = hit && hit.closest && hit.closest('.silhouette-zone');
         if (zone && !zone.classList.contains('matched')) {
           handleDrop(shapeId, zone, card);
         }
@@ -187,7 +250,7 @@
       matchCount++;
       if (window.SoundFX) SoundFX.correct();
       if (window.Mascot)  Mascot.happy(600);
-      if (matchCount === 4) setTimeout(onRoundComplete, 500);
+      if (matchCount === sourceCount) setTimeout(onRoundComplete, 500);
     } else {
       roundPerfect = false;
       zone.classList.remove('hover');
@@ -228,6 +291,17 @@
 
   window.nextRound = function () {
     if (!quizMode) { roundNum++; renderRound(); }
+  };
+
+  window.setDiff = function (level, btn) {
+    currentDiff = level;
+    document.querySelectorAll('.diff-btn').forEach(function (b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    roundNum = 1;
+    score    = 0;
+    renderRound();
   };
 
   renderRound();
