@@ -679,6 +679,15 @@ button {
 .name-dropzone.matched { background: #c8f7c5; border-color: #27ae60; border-style: solid; }
 .name-dropzone.wrong-shake { animation: mascot-shake 0.4s ease; }
 
+/* New shapes */
+.shape-oval     { width: 150px; height: 95px; border-radius: 50%; }
+.shape-pentagon { width: 130px; height: 130px;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+.shape-hexagon  { width: 130px; height: 130px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
+.shape-diamond  { width: 100px; height: 130px;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+
 /* Mini shape sizes inside drag cards */
 .drag-shape-card .shape-circle    { width: 58px; height: 58px; }
 .drag-shape-card .shape-square    { width: 52px; height: 52px; border-radius: 6px; }
@@ -686,4 +695,47 @@ button {
 .drag-shape-card .shape-rectangle { width: 76px; height: 40px; border-radius: 5px; }
 .drag-shape-card .shape-star      { width: 58px; height: 58px; }
 .drag-shape-card .shape-heart     { font-size: 50px; width: auto; height: auto; }
+.drag-shape-card .shape-oval      { width: 68px; height: 44px; }
+.drag-shape-card .shape-pentagon  { width: 56px; height: 56px; }
+.drag-shape-card .shape-hexagon   { width: 56px; height: 56px; }
+.drag-shape-card .shape-diamond   { width: 44px; height: 56px; }
+
+/* Silhouette zone */
+.silhouette-zone {
+  border: 2px dashed #bbb;
+  border-radius: 14px;
+  padding: 10px;
+  background: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.silhouette-zone.hover   { background: #ffedc2; border-color: #ff9900; border-style: solid; }
+.silhouette-zone.matched { background: #c8f7c5; border-color: #27ae60; border-style: solid; }
+.silhouette-zone.wrong-shake { animation: mascot-shake 0.4s ease; }
+
+/* Difficulty buttons */
+.diff-btn {
+  font-size: 15px;
+  padding: 6px 14px;
+  margin: 3px;
+  border-radius: 20px;
+  border: 2px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.diff-btn.active { background: #ffd966; border-color: #E6B800; font-weight: 700; }
+
+/* Silhouette grid */
+#siluetGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 440px;
+  margin: 0 auto 8px;
+}
 

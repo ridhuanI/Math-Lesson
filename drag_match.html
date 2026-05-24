@@ -16,13 +16,19 @@ body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
 <h2 class="page-title">🎯 Padankan Bentuk!</h2>
 <div class="hud-bar" id="hud"></div>
 
-<p class="drag-instruction">Seret bentuk ke nama yang betul 👇</p>
+<div class="mode-row" id="diffRow">
+  <button class="diff-btn active" onclick="setDiff(0,this)">🟢 Mudah</button>
+  <button class="diff-btn" onclick="setDiff(1,this)">🟡 Sederhana</button>
+  <button class="diff-btn" onclick="setDiff(2,this)">🔴 Sukar</button>
+</div>
+
+<p class="drag-instruction">Seret bentuk ke bayang yang sama 👇</p>
 
 <div class="match-grid" id="shapesGrid"></div>
 
 <div class="section-divider">↕</div>
 
-<div class="match-grid" id="namesGrid"></div>
+<div id="siluetGrid"></div>
 
 <div class="subject-feedback" id="feedback" style="display:none;"></div>
 <button class="next-btn" id="btnNext" onclick="nextRound()" style="display:none;">➡️ Pusingan Seterusnya</button>
