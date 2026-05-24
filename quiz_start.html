@@ -17,9 +17,16 @@
     // redirect berdasarkan operasi
     if (op === "tambah") {
         location.href = `addition.html?quiz=1&q=${q}&op=tambah`;
-    }
-    else if (op === "tolak") {
+    } else if (op === "tolak") {
         location.href = `subtraction.html?quiz=1&q=${q}&op=tolak`;
+    } else if (op === "huruf") {
+        location.href = `letters.html?quiz=1&q=${q}&op=huruf`;
+    } else if (op === "mengira") {
+        location.href = `counting.html?quiz=1&q=${q}&op=mengira`;
+    } else if (op === "bentuk") {
+        location.href = `shapes.html?quiz=1&q=${q}&op=bentuk`;
+    } else if (op === "haiwan") {
+        location.href = `animals.html?quiz=1&q=${q}&op=haiwan`;
     }
     
 </script>

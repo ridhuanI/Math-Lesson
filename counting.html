@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mengira</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
+.emoji-display {
+  min-height: 140px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+}
+.prompt-text { font-size: 22px; font-weight: 600; color: #555; margin: 8px 0 12px; }
+</style>
+</head>
+<body>
+
+<h2 class="page-title">⭐ Mengira</h2>
+<div class="hud-bar" id="hud"></div>
+
+<div class="question-card">
+  <div class="emoji-display" id="emojiDisplay"></div>
+</div>
+
+<div class="prompt-text">Berapa banyak?</div>
+
+<div class="choice-grid" id="choiceGrid"></div>
+
+<div class="subject-feedback" id="feedback" style="display:none;"></div>
+<button class="next-btn" id="btnNext" onclick="nextQuestion()" style="display:none;">➡️ Seterusnya</button>
+
+<a href="index.html" class="back-link">🏠 Menu Utama</a>
+
+<script src="sounds.js"></script>
+<script src="mascot.js"></script>
+<script src="counting_script.js"></script>
+</body>
+</html>

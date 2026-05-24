@@ -232,3 +232,400 @@ button {
     padding: 15px 0;
 }
 
+/* ============================================================
+   CSS VARIABLES
+   ============================================================ */
+:root {
+  --color-math:     #FF6B6B;
+  --color-letters:  #4ECDC4;
+  --color-counting: #FFB347;
+  --color-shapes:   #7EC8E3;
+  --color-animals:  #A8E063;
+  --card-radius: 20px;
+}
+
+/* ============================================================
+   SUBJECT CARD GRID  (index.html hub)
+   ============================================================ */
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.subject-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  border-radius: var(--card-radius);
+  text-decoration: none;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  min-height: 150px;
+  cursor: pointer;
+}
+
+.subject-card:hover,
+.subject-card:focus {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+}
+.subject-card:active { transform: scale(0.97); }
+
+.card-icon  { font-size: 52px; line-height: 1; }
+.card-label { font-size: 18px; font-weight: 700; margin-top: 10px; }
+.card-sub   { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+
+.card-math     { background: linear-gradient(135deg, #FF6B6B, #FF8E53); }
+.card-letters  { background: linear-gradient(135deg, #4ECDC4, #44A08D); }
+.card-counting { background: linear-gradient(135deg, #FFB347, #FF8C00); }
+.card-shapes   { background: linear-gradient(135deg, #7EC8E3, #3A7BD5); }
+.card-animals  { background: linear-gradient(135deg, #A8E063, #56AB2F); }
+
+/* ============================================================
+   MASCOT  (injected by mascot.js)
+   ============================================================ */
+#mascot-root {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 8000;
+  pointer-events: none;
+  width: 80px;
+  height: 80px;
+}
+
+.mascot-body {
+  width: 80px;
+  height: 80px;
+  background: #FFD966;
+  border-radius: 50%;
+  border: 3px solid #E6B800;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  transition: background 0.3s, transform 0.25s ease;
+}
+
+.mascot-eye {
+  position: absolute;
+  width: 13px;
+  height: 15px;
+  background: #333;
+  border-radius: 50%;
+  top: 26px;
+  transition: transform 0.2s, top 0.2s;
+}
+.mascot-eye.left  { left: 16px; }
+.mascot-eye.right { right: 16px; }
+
+.mascot-mouth {
+  position: absolute;
+  bottom: 17px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 14px;
+  border: 3px solid #333;
+  border-top: none;
+  border-radius: 0 0 28px 28px;
+  transition: all 0.25s ease;
+}
+
+.mascot-blush {
+  position: absolute;
+  width: 14px;
+  height: 8px;
+  background: rgba(255, 120, 120, 0.45);
+  border-radius: 50%;
+  top: 44px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.mascot-blush.left  { left: 6px; }
+.mascot-blush.right { right: 6px; }
+
+/* --- IDLE: gentle float --- */
+#mascot-root.state-idle .mascot-body {
+  animation: mascot-float 3s ease-in-out infinite;
+}
+
+/* --- HAPPY --- */
+#mascot-root.state-happy .mascot-body {
+  animation: mascot-bounce 0.5s ease-out;
+  background: #FFEC80;
+  border-color: #CCA800;
+}
+#mascot-root.state-happy .mascot-blush { opacity: 1; }
+#mascot-root.state-happy .mascot-mouth {
+  width: 36px;
+  height: 18px;
+  bottom: 13px;
+  border-radius: 0 0 36px 36px;
+}
+
+/* --- SAD --- */
+#mascot-root.state-sad .mascot-body {
+  animation: mascot-shake 0.5s ease;
+  background: #B0C8E0;
+  border-color: #7090B0;
+}
+#mascot-root.state-sad .mascot-eye {
+  transform: scaleY(0.5);
+  top: 30px;
+}
+#mascot-root.state-sad .mascot-mouth {
+  border-top: 3px solid #333;
+  border-bottom: none;
+  border-radius: 28px 28px 0 0;
+  bottom: 12px;
+}
+
+/* --- EXCITED --- */
+#mascot-root.state-excited .mascot-body {
+  animation: mascot-spin 0.6s ease-out;
+  background: #FF9E5E;
+  border-color: #CC6020;
+}
+#mascot-root.state-excited .mascot-blush { opacity: 1; }
+#mascot-root.state-excited .mascot-mouth {
+  width: 42px;
+  height: 22px;
+  border-radius: 0 0 42px 42px;
+}
+
+/* --- MASCOT KEYFRAMES --- */
+@keyframes mascot-float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes mascot-bounce {
+  0%   { transform: scale(1) translateY(0); }
+  40%  { transform: scale(1.18) translateY(-10px); }
+  70%  { transform: scale(0.95) translateY(3px); }
+  100% { transform: scale(1) translateY(0); }
+}
+@keyframes mascot-shake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-7px); }
+  40%  { transform: translateX(7px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+@keyframes mascot-spin {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(16deg) scale(1.15); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* ============================================================
+   UTILITY ANIMATION CLASSES
+   ============================================================ */
+.bounce  { animation: util-bounce 0.5s ease; }
+.wiggle  { animation: util-wiggle 0.5s ease; }
+.pop     { animation: util-pop 0.3s ease; }
+.float   { animation: util-float 2.5s ease-in-out infinite; }
+
+@keyframes util-bounce {
+  0%,100% { transform: translateY(0); }
+  40%     { transform: translateY(-12px); }
+  70%     { transform: translateY(4px); }
+}
+@keyframes util-wiggle {
+  0%,100% { transform: rotate(0deg); }
+  25%     { transform: rotate(-8deg); }
+  75%     { transform: rotate(8deg); }
+}
+@keyframes util-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+@keyframes util-float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-8px); }
+}
+
+/* ============================================================
+   CONFETTI  (quiz_result.html 3-star)
+   ============================================================ */
+.confetti-piece {
+  position: fixed;
+  top: -14px;
+  width: 10px;
+  height: 14px;
+  opacity: 0;
+  border-radius: 2px;
+  animation: confetti-fall linear forwards;
+  pointer-events: none;
+  z-index: 9999;
+}
+@keyframes confetti-fall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(110vh) rotate(720deg); }
+}
+
+/* ============================================================
+   SUBJECT PAGE SHARED STYLES  (counting, letters, shapes, animals)
+   ============================================================ */
+.hud-bar {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ff6600;
+  margin-bottom: 10px;
+  min-height: 28px;
+}
+
+.question-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+  padding: 24px 16px;
+  max-width: 420px;
+  margin: 0 auto 16px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  max-width: 340px;
+  margin: 0 auto 16px;
+}
+
+.choice-btn {
+  font-size: 26px;
+  font-weight: 700;
+  padding: 18px 10px;
+  border-radius: 14px;
+  border: 3px solid transparent;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+  line-height: 1.2;
+}
+.choice-btn:hover  { transform: scale(1.06); background: #fff8e1; }
+.choice-btn:active { transform: scale(0.97); }
+.choice-btn.correct { background: #c8f7c5 !important; border-color: #27ae60; }
+.choice-btn.wrong   { background: #ffd2d2 !important; border-color: #e74c3c; }
+
+.subject-feedback {
+  font-size: 24px;
+  font-weight: 700;
+  min-height: 36px;
+  margin-bottom: 10px;
+}
+
+.next-btn {
+  font-size: 20px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: none;
+  background: #ffd966;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  transition: transform 0.15s;
+}
+.next-btn:hover { transform: scale(1.05); }
+
+.mode-row {
+  margin-bottom: 12px;
+}
+.mode-btn {
+  font-size: 15px;
+  margin: 3px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 2px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.2s, border-color 0.2s;
+}
+.mode-btn.active {
+  background: #ffd966;
+  border-color: #E6B800;
+  color: #333;
+}
+
+/* Emoji pop animation for counting */
+.emoji-item {
+  display: inline-block;
+  font-size: 44px;
+  opacity: 0;
+  animation: emoji-pop 0.35s ease forwards;
+  margin: 3px;
+}
+@keyframes emoji-pop {
+  0%   { opacity: 0; transform: scale(0.2); }
+  70%  { transform: scale(1.20); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Shape display */
+.shape-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px auto;
+  width: 160px;
+  height: 160px;
+}
+
+.shape-el {
+  transition: background 0.3s;
+}
+.shape-circle    { width: 140px; height: 140px; border-radius: 50%; }
+.shape-square    { width: 130px; height: 130px; border-radius: 10px; }
+.shape-triangle  { width: 140px; height: 140px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+.shape-rectangle { width: 190px; height: 100px; border-radius: 8px; }
+.shape-star      { width: 140px; height: 140px;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.shape-heart     { font-size: 120px; line-height: 1; color: red; width: auto; height: auto; }
+
+/* Letter display */
+.letter-display {
+  font-size: 110px;
+  font-weight: 700;
+  line-height: 1;
+  width: 160px;
+  height: 160px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px auto;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.20);
+}
+
+/* Animal display */
+.animal-display {
+  font-size: 100px;
+  line-height: 1;
+  margin: 8px 0;
+  animation: util-pop 0.4s ease;
+}
+
+@media (max-width: 380px) {
+  .subject-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card-icon  { font-size: 40px; }
+  .card-label { font-size: 16px; }
+  .choice-btn { font-size: 22px; padding: 14px 8px; }
+  .letter-display { font-size: 88px; width: 130px; height: 130px; }
+  .animal-display { font-size: 80px; }
+}
+
