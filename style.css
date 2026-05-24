@@ -17,11 +17,13 @@
   font-weight: 700;
 }
 
-/* FORCE ALL ELEMENTS USE SAME FONT */
+/* FORCE ALL ELEMENTS USE SAME FONT + GLOBAL BOX MODEL */
 * {
+  box-sizing: border-box;
   font-family: 'Baloo2', sans-serif !important;
 }
 
+html, body { overflow-x: hidden; }
 
 body {
   text-align: center;
@@ -35,7 +37,7 @@ h2 {
 }
 
 .page-title {
-    font-size: 30px;
+    font-size: clamp(22px, 6vw, 30px);
     margin-top: 20px;
     margin-bottom: 10px;
     color: #ff7a00;
@@ -180,7 +182,7 @@ h2 {
 
 button {
   font-size: 20px;
-  margin-top: 25px;
+  margin-top: 0;
   padding: 10px 25px;
   border: none;
   border-radius: 8px;
@@ -252,7 +254,7 @@ button {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
-  max-width: 520px;
+  width: min(520px, 96vw);
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -489,7 +491,7 @@ button {
   border-radius: 18px;
   box-shadow: 0 3px 12px rgba(0,0,0,0.10);
   padding: 24px 16px;
-  max-width: 420px;
+  width: min(420px, 92vw);
   margin: 0 auto 16px;
   min-height: 160px;
   display: flex;
@@ -502,12 +504,12 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
-  max-width: 340px;
+  width: min(340px, 92vw);
   margin: 0 auto 16px;
 }
 
 .choice-btn {
-  font-size: 26px;
+  font-size: clamp(20px, 6vw, 26px);
   font-weight: 700;
   padding: 18px 10px;
   border-radius: 14px;
@@ -539,6 +541,7 @@ button {
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0,0,0,0.15);
   transition: transform 0.15s;
+  margin-top: 16px;
 }
 .next-btn:hover { transform: scale(1.05); }
 
@@ -622,13 +625,24 @@ button {
   animation: util-pop 0.4s ease;
 }
 
-@media (max-width: 380px) {
-  .subject-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .card-icon  { font-size: 40px; }
-  .card-label { font-size: 16px; }
-  .choice-btn { font-size: 22px; padding: 14px 8px; }
+@media (max-width: 600px) {
+  body { margin-top: 16px; }
+  .subject-grid  { gap: 10px; padding: 0 10px; }
+  .card-icon     { font-size: 40px; }
+  .card-label    { font-size: 16px; }
+  .choice-btn    { padding: 14px 8px; }
+  .question-card { padding: 16px 10px; min-height: 130px; }
   .letter-display { font-size: 88px; width: 130px; height: 130px; }
   .animal-display { font-size: 80px; }
+  .hud-bar       { font-size: 17px; }
+  .drag-shape-card { padding: 10px; min-height: 78px; }
+}
+
+@media (max-width: 380px) {
+  .subject-grid  { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card-icon     { font-size: 34px; }
+  .card-label    { font-size: 14px; }
+  .letter-display { font-size: 74px; width: 110px; height: 110px; }
 }
 
 /* ============================================================
@@ -638,7 +652,7 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  max-width: 340px;
+  width: min(340px, 92vw);
   margin: 0 auto 8px;
 }
 
@@ -748,7 +762,7 @@ button {
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  max-width: 440px;
+  width: min(440px, 96vw);
   margin: 0 auto 8px;
 }
 
@@ -765,11 +779,20 @@ button {
 }
 
 .colour-name-display {
-  font-size: 52px;
+  font-size: clamp(32px, 11vw, 52px);
   font-weight: 700;
   line-height: 1.2;
   color: #333;
   padding: 16px 0;
+}
+
+/* Math equation (addition + subtraction pages) */
+.math-equation {
+  font-size: clamp(32px, 11vw, 54px);
+  font-weight: 700;
+  color: #ff6600;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
 }
 
 .swatch-grid {
