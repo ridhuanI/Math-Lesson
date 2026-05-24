@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warna</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
+</style>
+</head>
+<body>
+
+<h2 class="page-title">🎨 Warna</h2>
+<div class="hud-bar" id="hud"></div>
+
+<div class="mode-row" id="modeRow">
+  <button class="mode-btn active" onclick="setMode('nama', this)">Nama</button>
+  <button class="mode-btn" onclick="setMode('padankan', this)">Padankan</button>
+</div>
+
+<div class="question-card">
+  <div id="colourDisplay"></div>
+</div>
+
+<div class="choice-grid" id="choiceGrid"></div>
+<div id="swatchGrid" class="swatch-grid" style="display:none;"></div>
+
+<div class="subject-feedback" id="feedback" style="display:none;"></div>
+<button class="next-btn" id="btnNext" onclick="nextQuestion()" style="display:none;">➡️ Seterusnya</button>
+
+<a href="index.html" class="back-link">🏠 Menu Utama</a>
+
+<script src="sounds.js"></script>
+<script src="mascot.js"></script>
+<script src="colours_script.js"></script>
+</body>
+</html>
