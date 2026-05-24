@@ -78,7 +78,6 @@
       btn.addEventListener('click', function () {
         if (answered) return;
         answered = true;
-        if (window.SoundFX) SoundFX.animal(currentAnimal.id);
         handleAnswer(name === currentAnimal.name, btn);
       });
       choiceGrid.appendChild(btn);
@@ -91,35 +90,29 @@
       else if (b === btn && !isCorrect)         b.classList.add('wrong');
     });
 
-    // Animal sound plays first; correct/wrong chime follows shortly
-    var soundDelay = isCorrect ? 400 : 0;
-    setTimeout(function () {
-      if (isCorrect) {
-        if (window.SoundFX) SoundFX.correct();
-        if (window.Mascot)  Mascot.happy();
-        score++;
-      } else {
-        if (window.SoundFX) SoundFX.wrong();
-        if (window.Mascot)  Mascot.sad();
-      }
-    }, soundDelay);
+    if (isCorrect) {
+      if (window.SoundFX) SoundFX.correct();
+      if (window.Mascot)  Mascot.happy();
+      score++;
+    } else {
+      if (window.SoundFX) SoundFX.wrong();
+      if (window.Mascot)  Mascot.sad();
+    }
 
     if (quizMode) {
       if (questionNum >= totalQ) {
-        setTimeout(finishQuiz, 900);
+        setTimeout(finishQuiz, 700);
       } else {
         questionNum++;
-        setTimeout(renderQuestion, 950);
+        setTimeout(renderQuestion, 750);
       }
     } else {
-      setTimeout(function () {
-        feedbackEl.style.display = 'block';
-        feedbackEl.style.color   = isCorrect ? 'green' : 'red';
-        feedbackEl.textContent   = isCorrect
-          ? '✅ Betul! Ia adalah ' + currentAnimal.name + '!'
-          : '❌ Salah! Ini adalah ' + currentAnimal.name;
-        btnNext.style.display = 'inline-block';
-      }, isCorrect ? 450 : 50);
+      feedbackEl.style.display = 'block';
+      feedbackEl.style.color   = isCorrect ? 'green' : 'red';
+      feedbackEl.textContent   = isCorrect
+        ? '✅ Betul! Ia adalah ' + currentAnimal.name + '!'
+        : '❌ Salah! Ini adalah ' + currentAnimal.name;
+      btnNext.style.display = 'inline-block';
     }
   }
 

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padankan Bentuk</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
+.drag-instruction { font-size: 17px; color: #777; margin: 0 0 12px; }
+.section-divider  { font-size: 28px; color: #ccc; margin: 4px 0 8px; line-height: 1; }
+</style>
+</head>
+<body>
+
+<h2 class="page-title">🎯 Padankan Bentuk!</h2>
+<div class="hud-bar" id="hud"></div>
+
+<p class="drag-instruction">Seret bentuk ke nama yang betul 👇</p>
+
+<div class="match-grid" id="shapesGrid"></div>
+
+<div class="section-divider">↕</div>
+
+<div class="match-grid" id="namesGrid"></div>
+
+<div class="subject-feedback" id="feedback" style="display:none;"></div>
+<button class="next-btn" id="btnNext" onclick="nextRound()" style="display:none;">➡️ Pusingan Seterusnya</button>
+
+<a href="index.html" class="back-link">🏠 Menu Utama</a>
+
+<script src="sounds.js"></script>
+<script src="mascot.js"></script>
+<script src="drag_match_script.js"></script>
+</body>
+</html>

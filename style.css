@@ -241,6 +241,7 @@ button {
   --color-counting: #FFB347;
   --color-shapes:   #7EC8E3;
   --color-animals:  #A8E063;
+  --color-match:    #C9A0F5;
   --card-radius: 20px;
 }
 
@@ -287,6 +288,7 @@ button {
 .card-counting { background: linear-gradient(135deg, #FFB347, #FF8C00); }
 .card-shapes   { background: linear-gradient(135deg, #7EC8E3, #3A7BD5); }
 .card-animals  { background: linear-gradient(135deg, #A8E063, #56AB2F); }
+.card-match    { background: linear-gradient(135deg, #C9A0F5, #9B59B6); }
 
 /* ============================================================
    MASCOT  (injected by mascot.js)
@@ -628,4 +630,60 @@ button {
   .letter-display { font-size: 88px; width: 130px; height: 130px; }
   .animal-display { font-size: 80px; }
 }
+
+/* ============================================================
+   DRAG & MATCH SHAPES  (drag_match.html)
+   ============================================================ */
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 340px;
+  margin: 0 auto 8px;
+}
+
+.drag-shape-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  user-select: none;
+  touch-action: none;
+  transition: transform 0.15s, opacity 0.25s, box-shadow 0.15s;
+}
+.drag-shape-card:hover   { box-shadow: 0 5px 14px rgba(0,0,0,0.18); }
+.drag-shape-card.dragging { opacity: 0.3; transform: scale(0.94); }
+.drag-shape-card.matched  { opacity: 0.22; pointer-events: none; cursor: default; }
+
+.name-dropzone {
+  border: 2px dashed #bbb;
+  border-radius: 14px;
+  padding: 12px 6px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  transition: background 0.2s, border-color 0.2s;
+  line-height: 1.2;
+}
+.name-dropzone.hover   { background: #ffedc2; border-color: #ff9900; border-style: solid; }
+.name-dropzone.matched { background: #c8f7c5; border-color: #27ae60; border-style: solid; }
+.name-dropzone.wrong-shake { animation: mascot-shake 0.4s ease; }
+
+/* Mini shape sizes inside drag cards */
+.drag-shape-card .shape-circle    { width: 58px; height: 58px; }
+.drag-shape-card .shape-square    { width: 52px; height: 52px; border-radius: 6px; }
+.drag-shape-card .shape-triangle  { width: 58px; height: 58px; }
+.drag-shape-card .shape-rectangle { width: 76px; height: 40px; border-radius: 5px; }
+.drag-shape-card .shape-star      { width: 58px; height: 58px; }
+.drag-shape-card .shape-heart     { font-size: 50px; width: auto; height: auto; }
 
