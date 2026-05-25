@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
+.english-word { font-size: clamp(38px, 12vw, 60px); font-weight: 700; color: #2193b0; }
+</style>
+</head>
+<body>
+
+<h2 class="page-title">🇬🇧 English</h2>
+<div class="hud-bar" id="hud"></div>
+
+<div class="mode-row">
+  <button class="mode-btn active" onclick="setTopic('warna',this)">Colours</button>
+  <button class="mode-btn" onclick="setTopic('haiwan',this)">Animals</button>
+  <button class="mode-btn" onclick="setTopic('nombor',this)">Numbers</button>
+  <button class="mode-btn" onclick="setTopic('badan',this)">Body</button>
+</div>
+
+<div class="question-card">
+  <div id="qDisplay"></div>
+</div>
+
+<div class="choice-grid" id="choiceGrid"></div>
+
+<div class="subject-feedback" id="feedback" style="display:none;"></div>
+<button class="next-btn" id="btnNext" onclick="nextQuestion()" style="display:none;">➡️ Next</button>
+
+<a href="index.html" class="back-link">🏠 Menu Utama</a>
+
+<script src="sounds.js"></script>
+<script src="mascot.js"></script>
+<script src="english_script.js"></script>
+</body>
+</html>

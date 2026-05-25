@@ -836,3 +836,22 @@ button {
 /* Hub card */
 .card-colours { background: linear-gradient(135deg, #FFC0CB, #FF69B4); }
 
+/* ============================================================
+   TAHUN 1 KSSR NEW SUBJECT CARDS
+   ============================================================ */
+.card-sukukata { background: linear-gradient(135deg, #F7971E, #FFD200); }
+.card-english  { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+.card-sains    { background: linear-gradient(135deg, #56ab2f, #a8e063); }
+
+/* Subject section grouping on home screen */
+.subject-section { margin-bottom: 4px; }
+.section-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 20px 0 8px;
+  text-align: center;
+}
+
