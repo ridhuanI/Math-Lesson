@@ -11,12 +11,13 @@
 
         body {
             padding-top: 60px;
+            padding-bottom: 40px;
             text-align: center;
         }
 
         h1 {
             color: #ff6600;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .menu-container {
@@ -26,13 +27,12 @@
             gap: 6px;
         }
 
-        /* Button untuk jenis quiz */
         button {
             display: inline-block;
-            font-size: 26px;
+            font-size: 22px;
             background: #ffd966;
             color: #333;
-            padding: 15px 40px;
+            padding: 13px 36px;
             border-radius: 12px;
             box-shadow: 0 3px 5px rgba(0,0,0,0.2);
             transition: transform 0.15s, background 0.3s;
@@ -45,7 +45,6 @@
             background: #ffeb99;
         }
 
-        /* BACK LINK: bukan button, bukan hyperlink look */
         a.back-link {
             font-size: 20px;
             color: #444;
@@ -68,16 +67,27 @@
 <h1>Pilih Jenis Quiz</h1>
 
 <div class="menu-container">
+
+    <div class="section-heading" style="margin:4px 0;">📐 Matematik</div>
     <button onclick="location.href='quiz_select.html?op=tambah'">➕ Matematik Tambah</button>
     <button onclick="location.href='quiz_select.html?op=tolak'">➖ Matematik Tolak</button>
-    <button onclick="location.href='quiz_select.html?op=huruf'">🔤 Huruf A-Z</button>
     <button onclick="location.href='quiz_select.html?op=mengira'">⭐ Mengira 1-10</button>
     <button onclick="location.href='quiz_select.html?op=bentuk'">🔷 Bentuk &amp; Warna</button>
-    <button onclick="location.href='quiz_select.html?op=haiwan'">🐘 Haiwan</button>
     <button onclick="location.href='quiz_select.html?op=padanan'">🎯 Padankan Bentuk</button>
+
+    <div class="section-heading" style="margin:14px 0 4px;">📖 Bahasa Melayu</div>
+    <button onclick="location.href='quiz_select.html?op=huruf'">🔤 Huruf A-Z</button>
+    <button onclick="location.href='quiz_select.html?op=sukukata'">🔡 Suku Kata BM</button>
     <button onclick="location.href='quiz_select.html?op=warna'">🎨 Warna</button>
 
-    <a href="index.html" class="back-link">🏠 Kembali ke Menu Utama</a>
+    <div class="section-heading" style="margin:14px 0 4px;">🇬🇧 English</div>
+    <button onclick="location.href='quiz_select.html?op=english'">🇬🇧 English</button>
+
+    <div class="section-heading" style="margin:14px 0 4px;">🔬 Sains</div>
+    <button onclick="location.href='quiz_select.html?op=haiwan'">🐘 Haiwan</button>
+    <button onclick="location.href='quiz_select.html?op=sains'">🔬 Sains</button>
+
+    <a href="index.html" class="back-link" style="margin-top:16px;">🏠 Kembali ke Menu Utama</a>
 </div>
 
 </body>

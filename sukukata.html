@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suku Kata BM</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { padding-top: 20px; padding-bottom: 60px; text-align: center; }
+.suku-display { font-size: clamp(40px, 12vw, 64px); font-weight: 700; color: #E67E22; letter-spacing: 4px; }
+.word-emoji { font-size: 70px; line-height: 1; }
+.blank-suku { color: #bbb; }
+</style>
+</head>
+<body>
+
+<h2 class="page-title">🔡 Suku Kata BM</h2>
+<div class="hud-bar" id="hud"></div>
+
+<div class="mode-row">
+  <button class="mode-btn active" onclick="setMode('kenal',this)">Kenal</button>
+  <button class="mode-btn" onclick="setMode('bina',this)">Bina Kata</button>
+  <button class="mode-btn" onclick="setMode('padankan',this)">Padankan</button>
+</div>
+
+<div class="question-card">
+  <div id="qDisplay"></div>
+</div>
+
+<div class="choice-grid" id="choiceGrid"></div>
+
+<div class="subject-feedback" id="feedback" style="display:none;"></div>
+<button class="next-btn" id="btnNext" onclick="nextQuestion()" style="display:none;">➡️ Seterusnya</button>
+
+<a href="index.html" class="back-link">🏠 Menu Utama</a>
+
+<script src="sounds.js"></script>
+<script src="mascot.js"></script>
+<script src="sukukata_script.js"></script>
+</body>
+</html>
