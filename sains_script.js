@@ -15,6 +15,9 @@
     { bahagian:'Daun',  emoji:'🍃', fungsi:'Membuat makanan' },
     { bahagian:'Bunga', emoji:'🌸', fungsi:'Tempat pembiakan' },
     { bahagian:'Buah',  emoji:'🍎', fungsi:'Mengandungi biji benih' },
+    { bahagian:'Akar',  emoji:'🌱', fungsi:'Menahan tumbuhan di tanah' },
+    { bahagian:'Batang',emoji:'🪵', fungsi:'Mengangkut air dan makanan' },
+    { bahagian:'Daun',  emoji:'🍃', fungsi:'Menyedut cahaya matahari' },
   ];
 
   var HAIWAN = [
@@ -28,6 +31,11 @@
     { nama:'Helang',      emoji:'🦅', jenis:'Burung' },
     { nama:'Ular',        emoji:'🐍', jenis:'Reptilia' },
     { nama:'Arnab',       emoji:'🐰', jenis:'Mamalia' },
+    { nama:'Kura-kura',   emoji:'🐢', jenis:'Reptilia' },
+    { nama:'Penguin',     emoji:'🐧', jenis:'Burung' },
+    { nama:'Rusa',        emoji:'🦌', jenis:'Mamalia' },
+    { nama:'Kuda',        emoji:'🐴', jenis:'Mamalia' },
+    { nama:'Lebah',       emoji:'🐝', jenis:'Artropod' },
   ];
 
   var ALL_JENIS = ['Mamalia', 'Burung', 'Ikan', 'Reptilia', 'Amfibia', 'Artropod'];
@@ -101,14 +109,27 @@
 
   function renderDeria() {
     var item = currentItem;
-    qDisplay.innerHTML =
-      '<div style="font-size:13px;color:#888;margin-bottom:8px;">Organ apakah yang digunakan untuk...</div>' +
-      '<div style="font-size:clamp(28px,9vw,44px);font-weight:700;color:#2980b9;">' + item.deria + '?</div>';
+    var fmt = Math.random() < 0.5 ? 'normal' : 'reverse';
 
-    var correct = item.emoji + ' ' + item.organ;
-    var pool = shuffle(DERIA.filter(function (d) { return d !== item; })).slice(0, 3)
+    if (fmt === 'normal') {
+      qDisplay.innerHTML =
+        '<div style="font-size:13px;color:#888;margin-bottom:8px;">Organ apakah yang digunakan untuk...</div>' +
+        '<div style="font-size:clamp(28px,9vw,44px);font-weight:700;color:#2980b9;">' + item.deria + '?</div>';
+      var correct = item.emoji + ' ' + item.organ;
+      var pool = shuffle(DERIA.filter(function (d) { return d !== item; })).slice(0, 3)
                    .map(function (d) { return d.emoji + ' ' + d.organ; });
-    renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(18px, 5.5vw, 22px)');
+      renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(18px,5.5vw,22px)');
+
+    } else {
+      qDisplay.innerHTML =
+        '<div style="font-size:70px;line-height:1;">' + item.emoji + '</div>' +
+        '<div style="font-size:22px;font-weight:700;margin-top:8px;">' + item.organ + '</div>' +
+        '<div style="font-size:13px;color:#888;margin-top:4px;">Apakah deria yang boleh digunakan?</div>';
+      var correct = item.deria;
+      var pool = shuffle(DERIA.filter(function (d) { return d !== item; })).slice(0, 3)
+                   .map(function (d) { return d.deria; });
+      renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(18px,5.5vw,22px)');
+    }
   }
 
   function renderTumbuhan() {
@@ -118,21 +139,39 @@
       '<div style="font-size:clamp(20px,6.5vw,30px);font-weight:700;color:#27ae60;">' + item.fungsi + '?</div>';
 
     var correct = item.emoji + ' ' + item.bahagian;
-    var pool = shuffle(TUMBUHAN.filter(function (d) { return d !== item; })).slice(0, 3)
-                   .map(function (d) { return d.emoji + ' ' + d.bahagian; });
-    renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(18px, 5.5vw, 22px)');
+    var uniqueParts = [];
+    var seen = {};
+    TUMBUHAN.forEach(function (t) {
+      if (!seen[t.bahagian]) { seen[t.bahagian] = true; uniqueParts.push(t); }
+    });
+    var pool = shuffle(uniqueParts.filter(function (t) { return t.bahagian !== item.bahagian; })).slice(0, 3)
+                 .map(function (t) { return t.emoji + ' ' + t.bahagian; });
+    renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(18px,5.5vw,22px)');
   }
 
   function renderHaiwan() {
     var item = currentItem;
-    qDisplay.innerHTML =
-      '<div style="font-size:70px;line-height:1;">' + item.emoji + '</div>' +
-      '<div style="font-size:22px;font-weight:700;margin-top:8px;">' + item.nama + '</div>' +
-      '<div style="font-size:13px;color:#888;margin-top:4px;">Apakah jenis haiwan ini?</div>';
+    var fmt = Math.random() < 0.5 ? 'normal' : 'reverse';
 
-    var correct = item.jenis;
-    var pool = shuffle(ALL_JENIS.filter(function (j) { return j !== correct; })).slice(0, 3);
-    renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(14px, 4.5vw, 18px)');
+    if (fmt === 'normal') {
+      qDisplay.innerHTML =
+        '<div style="font-size:70px;line-height:1;">' + item.emoji + '</div>' +
+        '<div style="font-size:22px;font-weight:700;margin-top:8px;">' + item.nama + '</div>' +
+        '<div style="font-size:13px;color:#888;margin-top:4px;">Apakah jenis haiwan ini?</div>';
+      var correct = item.jenis;
+      var pool = shuffle(ALL_JENIS.filter(function (j) { return j !== correct; })).slice(0, 3);
+      renderChoices(shuffle([correct].concat(pool)), correct, 'clamp(14px,4.5vw,18px)');
+
+    } else {
+      qDisplay.innerHTML =
+        '<div style="font-size:clamp(28px,9vw,44px);font-weight:700;color:#16a085;">' + item.jenis + '</div>' +
+        '<div style="font-size:13px;color:#888;margin-top:6px;">Pilih haiwan jenis ini</div>';
+      var correct = item.emoji + ' ' + item.nama;
+      var distractors = shuffle(HAIWAN.filter(function (h) {
+        return h !== item && h.jenis !== item.jenis;
+      })).slice(0, 3).map(function (h) { return h.emoji + ' ' + h.nama; });
+      renderChoices(shuffle([correct].concat(distractors)), correct, 'clamp(14px,4.5vw,18px)');
+    }
   }
 
   function renderChoices(choices, correct, fontSize) {

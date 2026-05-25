@@ -10,6 +10,10 @@
     { id:'ungu',        name:'Ungu',        hex:'#9B59B6' },
     { id:'merah-jambu', name:'Merah Jambu', hex:'#FF69B4' },
     { id:'coklat',      name:'Coklat',      hex:'#8B6914' },
+    { id:'putih',       name:'Putih',       hex:'#F5F5F5' },
+    { id:'hitam',       name:'Hitam',       hex:'#222222' },
+    { id:'kelabu',      name:'Kelabu',      hex:'#888888' },
+    { id:'emas',        name:'Emas',        hex:'#FFD700' },
   ];
 
   var params    = new URLSearchParams(window.location.search);
@@ -61,6 +65,9 @@
       var circle = document.createElement('div');
       circle.className = 'colour-display';
       circle.style.background = target.hex;
+      var useSquare = Math.random() < 0.5;
+      if (useSquare) circle.style.borderRadius = '8px';
+      if (target.id === 'putih') circle.style.border = '2px solid #ccc';
       colourDisplay.appendChild(circle);
 
       pool.forEach(function (c) {
@@ -94,6 +101,7 @@
         btn.className = 'colour-swatch-btn';
         btn.style.background = c.hex;
         btn.dataset.colorId = c.id;
+        if (c.id === 'putih') btn.style.border = '2px solid #ccc';
         btn.addEventListener('click', function () {
           if (answered) return;
           answered = true;

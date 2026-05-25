@@ -78,16 +78,17 @@
     var target = LETTERS[Math.floor(Math.random() * LETTERS.length)];
 
     if (mode === 1) {
-      // Show big letter → pick the correct letter
       questionCard.innerHTML =
         '<div class="letter-display" style="background:' + target.color + ';">' + target.letter + '</div>' +
         '<div class="word-hint">' + target.word + '</div>';
       promptEl.textContent = 'Apakah huruf ini?';
     } else {
-      // Show emoji + word → pick the first letter
-      questionCard.innerHTML =
-        '<div class="emoji-hint">' + target.emoji + '</div>' +
-        '<div class="word-hint" style="font-size:28px;font-weight:700;">' + target.word + '</div>';
+      // random: show emoji+word, word only, or emoji only
+      var fmt = ['both', 'text', 'emoji'][Math.floor(Math.random() * 3)];
+      var content = '';
+      if (fmt !== 'text')  content += '<div class="emoji-hint">' + target.emoji + '</div>';
+      if (fmt !== 'emoji') content += '<div class="word-hint" style="font-size:28px;font-weight:700;">' + target.word + '</div>';
+      questionCard.innerHTML = content;
       promptEl.textContent = 'Apakah huruf pertama?';
     }
 

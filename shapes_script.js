@@ -2,13 +2,15 @@
   'use strict';
 
   var SHAPES = [
-    { id:'bulatan',          name:'Bulatan',          css:'shape-circle',    unicode:'' },
-    { id:'segi-empat',       name:'Segi Empat',        css:'shape-square',    unicode:'' },
-    { id:'segi-tiga',        name:'Segi Tiga',         css:'shape-triangle',  unicode:'' },
-    { id:'segi-empat-panjang',name:'Segi Empat Panjang',css:'shape-rectangle', unicode:'' },
-    { id:'bintang',          name:'Bintang',           css:'shape-star',      unicode:'' },
-    { id:'hati',             name:'Hati',              css:'shape-heart',     unicode:'♥' },
+    { id:'bulatan',           name:'Bulatan',           css:'shape-circle',    unicode:'',  sides:0 },
+    { id:'segi-empat',        name:'Segi Empat',         css:'shape-square',    unicode:'',  sides:4 },
+    { id:'segi-tiga',         name:'Segi Tiga',          css:'shape-triangle',  unicode:'',  sides:3 },
+    { id:'segi-empat-panjang',name:'Segi Empat Panjang', css:'shape-rectangle', unicode:'',  sides:4 },
+    { id:'bintang',           name:'Bintang',            css:'shape-star',      unicode:'',  sides:5 },
+    { id:'hati',              name:'Hati',               css:'shape-heart',     unicode:'♥', sides:0 },
   ];
+
+  var POLY_SHAPES = SHAPES.filter(function (s) { return s.sides > 0; });
 
   var COLORS = [
     { id:'merah',       name:'Merah',       hex:'#E74C3C' },
@@ -66,15 +68,18 @@
     btnNext.style.display    = 'none';
     updateHUD();
 
-    var mode  = quizMode ? (['bentuk','warna'][Math.floor(Math.random() * 2)])
-                         : (currentMode === 'campur' ? (['bentuk','warna'][Math.floor(Math.random() * 2)]) : currentMode);
-    var shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    var modes = ['bentuk', 'warna', 'sisi'];
+    var mode = quizMode
+      ? modes[Math.floor(Math.random() * modes.length)]
+      : (currentMode === 'campur' ? modes[Math.floor(Math.random() * modes.length)] : currentMode);
+
+    // sisi only works with polygon shapes; fall back to bentuk for other modes
+    var shapePool = (mode === 'sisi') ? POLY_SHAPES : SHAPES;
+    var shape = shapePool[Math.floor(Math.random() * shapePool.length)];
     var color = COLORS[Math.floor(Math.random() * COLORS.length)];
 
-    // Draw the shape
     shapeDisplay.innerHTML = '';
     if (shape.unicode) {
-      // heart — use unicode character with color
       var span = document.createElement('span');
       span.className = 'shape-el shape-heart';
       span.style.color = color.hex;
@@ -96,10 +101,9 @@
         var s = SHAPES[Math.floor(Math.random() * SHAPES.length)].name;
         if (pool.indexOf(s) === -1) pool.push(s);
       }
-      pool = shuffle(pool);
-      renderChoices(pool, shape.name, 'bentuk');
+      renderChoices(shuffle(pool), shape.name, 'bentuk');
 
-    } else {
+    } else if (mode === 'warna') {
       promptEl.textContent = 'Apakah warna ini?';
       currentAnswer = color.name;
 
@@ -108,8 +112,18 @@
         var c = COLORS[Math.floor(Math.random() * COLORS.length)].name;
         if (cpool.indexOf(c) === -1) cpool.push(c);
       }
-      cpool = shuffle(cpool);
-      renderChoices(cpool, color.name, 'warna');
+      renderChoices(shuffle(cpool), color.name, 'warna');
+
+    } else {
+      promptEl.textContent = 'Berapa sisi bentuk ini?';
+      currentAnswer = String(shape.sides);
+
+      var sidesPool = shuffle(['3', '4', '5', '6']);
+      if (sidesPool.indexOf(currentAnswer) === -1) {
+        sidesPool[3] = currentAnswer;
+        sidesPool = shuffle(sidesPool);
+      }
+      renderChoices(sidesPool, currentAnswer, 'sisi');
     }
   }
 

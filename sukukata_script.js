@@ -2,21 +2,31 @@
   'use strict';
 
   var WORDS = [
-    { suku:['ba','tu'],    word:'batu',   emoji:'🪨' },
-    { suku:['bu','ku'],    word:'buku',   emoji:'📚' },
-    { suku:['bi','ru'],    word:'biru',   emoji:'💙' },
-    { suku:['bo','la'],    word:'bola',   emoji:'⚽' },
-    { suku:['ka','ki'],    word:'kaki',   emoji:'🦶' },
-    { suku:['ma','ta'],    word:'mata',   emoji:'👁️' },
-    { suku:['ku','da'],    word:'kuda',   emoji:'🐴' },
-    { suku:['i','kan'],    word:'ikan',   emoji:'🐟' },
-    { suku:['ru','mah'],   word:'rumah',  emoji:'🏠' },
-    { suku:['su','su'],    word:'susu',   emoji:'🥛' },
-    { suku:['na','si'],    word:'nasi',   emoji:'🍚' },
+    { suku:['ba','tu'],      word:'batu',   emoji:'🪨' },
+    { suku:['bu','ku'],      word:'buku',   emoji:'📚' },
+    { suku:['bi','ru'],      word:'biru',   emoji:'💙' },
+    { suku:['bo','la'],      word:'bola',   emoji:'⚽' },
+    { suku:['ka','ki'],      word:'kaki',   emoji:'🦶' },
+    { suku:['ma','ta'],      word:'mata',   emoji:'👁️' },
+    { suku:['ku','da'],      word:'kuda',   emoji:'🐴' },
+    { suku:['i','kan'],      word:'ikan',   emoji:'🐟' },
+    { suku:['ru','mah'],     word:'rumah',  emoji:'🏠' },
+    { suku:['su','su'],      word:'susu',   emoji:'🥛' },
+    { suku:['na','si'],      word:'nasi',   emoji:'🍚' },
     { suku:['ku','ci','ng'], word:'kucing', emoji:'🐱' },
-    { suku:['a','yam'],    word:'ayam',   emoji:'🐔' },
-    { suku:['pi','sau'],   word:'pisau',  emoji:'🔪' },
-    { suku:['ta','ngan'],  word:'tangan', emoji:'✋' },
+    { suku:['a','yam'],      word:'ayam',   emoji:'🐔' },
+    { suku:['pi','sau'],     word:'pisau',  emoji:'🔪' },
+    { suku:['ta','ngan'],    word:'tangan', emoji:'✋' },
+    { suku:['pa','di'],      word:'padi',   emoji:'🌾' },
+    { suku:['gu','la'],      word:'gula',   emoji:'🍬' },
+    { suku:['da','du'],      word:'dadu',   emoji:'🎲' },
+    { suku:['lo','ri'],      word:'lori',   emoji:'🚛' },
+    { suku:['du','it'],      word:'duit',   emoji:'💰' },
+    { suku:['ja','ri'],      word:'jari',   emoji:'☝️' },
+    { suku:['ba','ju'],      word:'baju',   emoji:'👕' },
+    { suku:['to','pi'],      word:'topi',   emoji:'🎩' },
+    { suku:['me','ja'],      word:'meja',   emoji:'🪑' },
+    { suku:['sa','pu'],      word:'sapu',   emoji:'🧹' },
   ];
 
   var params    = new URLSearchParams(location.search);
@@ -79,17 +89,19 @@
 
   function renderQuestion() {
     var w = currentWord;
+    var showEmoji = Math.random() < 0.5;
+    var emojiHtml = showEmoji ? '<div class="word-emoji">' + w.emoji + '</div>' : '';
 
     if (currentMode === 'kenal') {
       qDisplay.innerHTML =
-        '<div class="word-emoji">' + w.emoji + '</div>' +
+        emojiHtml +
         '<div class="suku-display">' + w.suku.join('-') + '</div>';
       renderSyllableChoices(w.suku[0]);
 
     } else if (currentMode === 'bina') {
       var rest = w.suku.slice(1).join('-');
       qDisplay.innerHTML =
-        '<div class="word-emoji">' + w.emoji + '</div>' +
+        emojiHtml +
         '<div class="suku-display"><span class="blank-suku">__</span>-' + rest + '</div>';
       renderSyllableChoices(w.suku[0]);
 

@@ -3,45 +3,54 @@
 
   var TOPICS = {
     warna: [
-      { en:'Red',     my:'Merah',       emoji:'🔴' },
-      { en:'Blue',    my:'Biru',        emoji:'🔵' },
-      { en:'Yellow',  my:'Kuning',      emoji:'🟡' },
-      { en:'Green',   my:'Hijau',       emoji:'🟢' },
-      { en:'Orange',  my:'Oren',        emoji:'🟠' },
-      { en:'Purple',  my:'Ungu',        emoji:'🟣' },
-      { en:'Pink',    my:'Merah Jambu', emoji:'🩷' },
-      { en:'Brown',   my:'Coklat',      emoji:'🟤' },
+      { en:'Red',    emoji:'🔴' },
+      { en:'Blue',   emoji:'🔵' },
+      { en:'Yellow', emoji:'🟡' },
+      { en:'Green',  emoji:'🟢' },
+      { en:'Orange', emoji:'🟠' },
+      { en:'Purple', emoji:'🟣' },
+      { en:'Pink',   emoji:'🩷' },
+      { en:'Brown',  emoji:'🟤' },
+      { en:'White',  emoji:'⬜' },
+      { en:'Black',  emoji:'⬛' },
     ],
     haiwan: [
-      { en:'Cat',      my:'Kucing',   emoji:'🐱' },
-      { en:'Dog',      my:'Anjing',   emoji:'🐶' },
-      { en:'Bird',     my:'Burung',   emoji:'🐦' },
-      { en:'Fish',     my:'Ikan',     emoji:'🐟' },
-      { en:'Rabbit',   my:'Arnab',    emoji:'🐰' },
-      { en:'Elephant', my:'Gajah',    emoji:'🐘' },
-      { en:'Tiger',    my:'Harimau',  emoji:'🐯' },
-      { en:'Monkey',   my:'Monyet',   emoji:'🐒' },
+      { en:'Cat',       emoji:'🐱' },
+      { en:'Dog',       emoji:'🐶' },
+      { en:'Bird',      emoji:'🐦' },
+      { en:'Fish',      emoji:'🐟' },
+      { en:'Rabbit',    emoji:'🐰' },
+      { en:'Elephant',  emoji:'🐘' },
+      { en:'Tiger',     emoji:'🐯' },
+      { en:'Monkey',    emoji:'🐒' },
+      { en:'Lion',      emoji:'🦁' },
+      { en:'Penguin',   emoji:'🐧' },
+      { en:'Crocodile', emoji:'🐊' },
+      { en:'Turtle',    emoji:'🐢' },
     ],
     nombor: [
-      { en:'One',    my:'Satu',     emoji:'1️⃣' },
-      { en:'Two',    my:'Dua',      emoji:'2️⃣' },
-      { en:'Three',  my:'Tiga',     emoji:'3️⃣' },
-      { en:'Four',   my:'Empat',    emoji:'4️⃣' },
-      { en:'Five',   my:'Lima',     emoji:'5️⃣' },
-      { en:'Six',    my:'Enam',     emoji:'6️⃣' },
-      { en:'Seven',  my:'Tujuh',    emoji:'7️⃣' },
-      { en:'Eight',  my:'Lapan',    emoji:'8️⃣' },
-      { en:'Nine',   my:'Sembilan', emoji:'9️⃣' },
-      { en:'Ten',    my:'Sepuluh',  emoji:'🔟' },
+      { en:'One',    emoji:'1️⃣' },
+      { en:'Two',    emoji:'2️⃣' },
+      { en:'Three',  emoji:'3️⃣' },
+      { en:'Four',   emoji:'4️⃣' },
+      { en:'Five',   emoji:'5️⃣' },
+      { en:'Six',    emoji:'6️⃣' },
+      { en:'Seven',  emoji:'7️⃣' },
+      { en:'Eight',  emoji:'8️⃣' },
+      { en:'Nine',   emoji:'9️⃣' },
+      { en:'Ten',    emoji:'🔟' },
     ],
     badan: [
-      { en:'Eyes',   my:'Mata',    emoji:'👀' },
-      { en:'Nose',   my:'Hidung',  emoji:'👃' },
-      { en:'Mouth',  my:'Mulut',   emoji:'👄' },
-      { en:'Ears',   my:'Telinga', emoji:'👂' },
-      { en:'Head',   my:'Kepala',  emoji:'🗣️' },
-      { en:'Hands',  my:'Tangan',  emoji:'✋' },
-      { en:'Feet',   my:'Kaki',    emoji:'🦶' },
+      { en:'Eyes',    emoji:'👀' },
+      { en:'Nose',    emoji:'👃' },
+      { en:'Mouth',   emoji:'👄' },
+      { en:'Ears',    emoji:'👂' },
+      { en:'Head',    emoji:'🗣️' },
+      { en:'Hands',   emoji:'✋' },
+      { en:'Feet',    emoji:'🦶' },
+      { en:'Fingers', emoji:'🖐️' },
+      { en:'Back',    emoji:'🔙' },
+      { en:'Tummy',   emoji:'🫃' },
     ],
   };
 
@@ -51,7 +60,7 @@
   var qNum = 0, betul = 0, salah = 0;
   var currentTopic = 'warna';
   var currentItem  = null;
-  var qType    = 'terjemah';
+  var qType    = 'pic2word';
   var answered = false;
 
   var qDisplay   = document.getElementById('qDisplay');
@@ -71,7 +80,7 @@
 
   function updateHud() {
     if (quizMode) {
-      hud.textContent = 'Soalan ' + (qNum + 1) + ' / ' + quizTotal;
+      hud.textContent = 'Question ' + (qNum + 1) + ' / ' + quizTotal;
     } else {
       hud.textContent = '✅ ' + betul + '  ❌ ' + salah;
     }
@@ -100,17 +109,17 @@
 
     var data = TOPICS[currentTopic];
     currentItem = data[Math.floor(Math.random() * data.length)];
-    qType = Math.random() < 0.5 ? 'terjemah' : 'teka';
+    qType = Math.random() < 0.5 ? 'pic2word' : 'word2pic';
     updateHud();
     renderQuestion();
   }
   window.nextQuestion = nextQuestion;
 
-  function makeChoiceBtn(text, isCorrect, correctText) {
+  function makeChoiceBtn(text, isCorrect, correctText, fontSize) {
     var btn = document.createElement('button');
     btn.className = 'choice-btn';
     btn.textContent = text;
-    btn.style.fontSize = 'clamp(14px, 4.5vw, 18px)';
+    btn.style.fontSize = fontSize || 'clamp(14px, 4.5vw, 18px)';
     btn.addEventListener('click', function () {
       handleAnswer(isCorrect, correctText, btn);
     });
@@ -121,23 +130,24 @@
     var item = currentItem;
     var data  = TOPICS[currentTopic];
 
-    if (qType === 'terjemah') {
+    if (qType === 'pic2word') {
       qDisplay.innerHTML =
-        '<div class="english-word">' + item.en + '</div>' +
-        '<div style="font-size:13px;color:#aaa;margin-top:4px;">Apakah maksud dalam Bahasa Melayu?</div>';
-      var correct = item.my;
-      var pool = shuffle(data.filter(function (d) { return d !== item; })).slice(0, 3).map(function (d) { return d.my; });
+        '<div style="font-size:80px;line-height:1;">' + item.emoji + '</div>' +
+        '<div style="font-size:13px;color:#aaa;margin-top:6px;">What is this?</div>';
+      var correct = item.en;
+      var pool = shuffle(data.filter(function (d) { return d !== item; })).slice(0, 3).map(function (d) { return d.en; });
       shuffle([correct].concat(pool)).forEach(function (choice) {
         choiceGrid.appendChild(makeChoiceBtn(choice, choice === correct, correct));
       });
 
     } else {
-      qDisplay.innerHTML = '<div style="font-size:80px;line-height:1;">' + item.emoji + '</div>' +
-        '<div style="font-size:13px;color:#aaa;margin-top:6px;">What is this in English?</div>';
-      var correct = item.en;
-      var pool = shuffle(data.filter(function (d) { return d !== item; })).slice(0, 3).map(function (d) { return d.en; });
+      qDisplay.innerHTML =
+        '<div class="english-word">' + item.en + '</div>' +
+        '<div style="font-size:13px;color:#aaa;margin-top:6px;">Pick the matching picture</div>';
+      var correct = item.emoji;
+      var pool = shuffle(data.filter(function (d) { return d !== item; })).slice(0, 3).map(function (d) { return d.emoji; });
       shuffle([correct].concat(pool)).forEach(function (choice) {
-        choiceGrid.appendChild(makeChoiceBtn(choice, choice === correct, correct));
+        choiceGrid.appendChild(makeChoiceBtn(choice, choice === correct, correct, '40px'));
       });
     }
   }
